@@ -2,6 +2,8 @@
 
 **Your first 30 days in Bengaluru, sorted.** A rule-based agent for people moving to the city for work. It builds a personalised Week 1–4 plan, ranks neighbourhoods by commute, rent and monsoon risk, checks whether a quoted rent is fair, and flags risky clauses in a rental agreement, showing how much money is at stake.
 
+**Live demo:** https://sandeepanmahapatra.github.io/namma-bengaluru-buddy/
+
 Theme: **Smarter Streets, Better Living** (commute planning, neighbourhood flood and water risk).
 
 ## The problem
@@ -52,7 +54,7 @@ It also produces a 21-task plan that fits in four weeks.
 
 ## How to run
 
-Open `index.html` in any browser. There's no build step and no install, and it works offline from `file://`. Click **⚡ Load demo profile → Generate My Plan**, then **📄 Load sample agreement → Scan**.
+Use the live demo link above, or clone the repo and open `index.html` in any browser. There's no build step and no install, and it works offline from `file://`. Click **⚡ Load demo profile → Generate My Plan**, then **📄 Load sample agreement → Scan**.
 
 ## Architecture
 
@@ -93,3 +95,7 @@ The design principle is **AI at authoring time, rules at runtime**:
 - IBM watsonx Granite for free-text intake ("I join Infosys EC on the 7th, have a bike")
 - Docling to parse PDF or scanned agreements before the rule check
 - Live BBMP flood alerts and BWSSB supply schedules for the risk layer
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).
