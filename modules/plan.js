@@ -104,7 +104,7 @@ function planSchedule(sorted, joiningWeek, trace) {
   var lagMap = {};
   var i;
   for (i = 0; i < sorted.length; i++) {
-    lagMap[sorted[i].id] = sorted[i].lagDays || 1;
+    lagMap[sorted[i].id] = sorted[i].lagDays || 0;
   }
 
   var adminCount = {};
@@ -116,7 +116,9 @@ function planSchedule(sorted, joiningWeek, trace) {
     var depWeek = 0;
     for (var d = 0; d < deps.length; d++) {
       var s = scheduled[deps[d]];
-      var lag = Math.ceil((lagMap[deps[d]] || 1) / 7);
+      // A dependent may share its dependency's week (topo order keeps it after it);
+      // only real waits of 7+ days push it into a later week.
+      var lag = Math.floor((lagMap[deps[d]] || 0) / 7);
       if (s.scheduledWeek + lag > depWeek) depWeek = s.scheduledWeek + lag;
     }
 
@@ -180,9 +182,16 @@ function planRender(scheduled, profile, tokens, trace) {
     if (!items || items.length === 0) continue;
 
     var weekLabel = "Week " + wn;
-    if (wn === 1) weekLabel += " — Before you join";
-    if (profile.join_date) {
-      var wstart = new Date(profile.join_date);
+    if (profile.move_date && profile.join_date) {
+      var joinD = new Date(profile.join_date);
+      var joinWeekNum = Math.floor((joinD - new Date(profile.move_date)) / 86400000 / 7) + 1;
+      if (wn < joinWeekNum) weekLabel += " · Before you join";
+      if (wn === joinWeekNum) weekLabel += " · You join on " +
+        joinD.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+    }
+    var anchorDate = profile.move_date || profile.join_date;
+    if (anchorDate) {
+      var wstart = new Date(anchorDate);
       wstart.setDate(wstart.getDate() + (wn - 1) * 7);
       var wend = new Date(wstart);
       wend.setDate(wend.getDate() + 6);

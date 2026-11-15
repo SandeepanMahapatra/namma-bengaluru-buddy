@@ -81,8 +81,12 @@ window.AreasModule = (function() {
       html += scoreBar("Owner fit", item.fitScore, item.fitScore + "%");
 
       // Tags
-      if (a.tags && a.tags.length > 0) {
-        html += "<div class='area-tags'>" + a.tags.map(function(t) {
+      var shownTags = (a.tags || []).filter(function(t) {
+        // School tags only matter to families
+        return profile.household === "Family" || !/school/i.test(t);
+      });
+      if (shownTags.length > 0) {
+        html += "<div class='area-tags'>" + shownTags.map(function(t) {
           return "<span class='area-tag'>" + t + "</span>";
         }).join("") + "</div>";
       }

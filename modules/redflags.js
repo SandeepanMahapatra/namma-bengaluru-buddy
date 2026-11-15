@@ -71,7 +71,9 @@ window.RedFlagsModule = (function() {
           triggered.push({ rule: rule, matchedSnippet: matchedSnippet, detail: null });
           totalRisk += rule.riskPoints;
           trace.push("🔴 Fired <code>" + rule.id + "</code>: matched pattern <code>" + matchedPattern + "</code>" +
-            (matchedSnippet ? " → "" + matchedSnippet + """ : "") +
+            (matchedSnippet ? " → “" + String(matchedSnippet).replace(/[&<>"']/g, function(c) {
+              return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+            }) + "”" : "") +
             " → +" + rule.riskPoints + " risk points");
         } else {
           trace.push("⬜ Skipped <code>" + rule.id + "</code>: no pattern matched");

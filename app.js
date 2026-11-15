@@ -143,16 +143,25 @@
 
     var profile = buildProfile();
 
-    if (!profile.office_area) {
-      alert("Please select an office location.");
-      return;
-    }
-    if (!profile.household) {
-      alert("Please select household type.");
-      return;
-    }
-    if (!profile.diet) {
-      alert("Please select diet.");
+    // Inline validation instead of alert()
+    document.querySelectorAll(".field-error").forEach(function(el) { el.remove(); });
+    document.querySelectorAll(".field.has-error").forEach(function(el) { el.classList.remove("has-error"); });
+    var missing = [
+      ["office_area", profile.office_area, "Choose where your office is."],
+      ["household",   profile.household,   "Choose who you're moving with."],
+      ["diet",        profile.diet,        "Choose your diet so we can match owner rules."]
+    ].filter(function(m) { return !m[1]; });
+    if (missing.length > 0) {
+      missing.forEach(function(m) {
+        var input = document.getElementById(m[0]);
+        var field = input.closest(".field");
+        field.classList.add("has-error");
+        var msg = document.createElement("div");
+        msg.className = "field-error";
+        msg.textContent = m[2];
+        field.appendChild(msg);
+      });
+      document.getElementById(missing[0][0]).focus();
       return;
     }
 
@@ -191,7 +200,12 @@
     if (areaTokens.top_area_1) rentArea.value = areaTokens.top_area_1;
     var rentBhk = document.getElementById("rent-bhk");
     rentBhk.value = (profile.household === "Family") ? "2BHK" : "1BHK";
-    document.getElementById("rent-quoted").value = profile.budget_rent;
+    // Pre-fill a realistic broker quote (~25% over the area's average) instead of the full budget
+    var topArea = window.DATA_AREAS.filter(function(a) { return a.name === areaTokens.top_area_1; })[0];
+    var avgKey = rentBhk.value === "2BHK" ? "avg_rent_2bhk" : "avg_rent_1bhk";
+    document.getElementById("rent-quoted").value = (topArea && topArea[avgKey])
+      ? Math.round(topArea[avgKey] * 1.25 / 500) * 500
+      : "";
 
     // Pre-fill agreement rent
     document.getElementById("agreement-rent").value = profile.budget_rent;

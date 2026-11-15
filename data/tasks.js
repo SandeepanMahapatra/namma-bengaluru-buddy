@@ -8,7 +8,7 @@ window.DATA_TASKS = [
     category: "Housing",
     depends_on: [],
     required_if: {},
-    description: "Use the Area Finder above to pick neighbourhoods that fit your commute, budget (₹{{budget_rent}}/mo), and lifestyle. Visit at least 2 in person.",
+    description: "Use the Area Finder above to pick neighbourhoods that fit your commute, budget ({{budget_rent}}/mo), and lifestyle. Visit at least 2 in person.",
     tips: ["Walk the streets on a weekday morning to gauge traffic noise.", "Check if the main road floods during rain (ask locals)."]
   },
   {
@@ -19,7 +19,7 @@ window.DATA_TASKS = [
     category: "Housing",
     depends_on: ["shortlist_areas"],
     required_if: {},
-    description: "Schedule visits via NoBroker, MagicBricks, or local brokers. Budget ₹{{budget_rent}}/mo for rent excluding maintenance.",
+    description: "Schedule visits via NoBroker, MagicBricks, or local brokers. Budget {{budget_rent}}/mo for rent excluding maintenance.",
     tips: ["Ask if owner is veg-only/family-only before visiting.", "Check water supply timings and pressure."]
   },
   {
@@ -85,7 +85,7 @@ window.DATA_TASKS = [
     defaultWeek: 2,
     lagDays: 7,
     category: "Paperwork",
-    depends_on: ["sign_agreement"],
+    depends_on: ["sign_agreement", "move_in"],
     required_if: {},
     description: "Book an Aadhaar appointment at a nearby Enrolment Centre or use the myAadhaar portal for online update. Needs rental agreement as address proof.",
     tips: ["Online update (myAadhaar) takes 7–10 days and is free.", "Aadhaar update is a prerequisite for bank address change and gas connection."]
