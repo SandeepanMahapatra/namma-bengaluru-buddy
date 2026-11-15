@@ -1,0 +1,452 @@
+{
+ "Hebbal": {
+  "Manyata Tech Park": {
+   "km": 4.0,
+   "freeflow_min": 7
+  },
+  "Whitefield": {
+   "km": 20.2,
+   "freeflow_min": 26
+  },
+  "Electronic City": {
+   "km": 27.2,
+   "freeflow_min": 34
+  },
+  "Koramangala": {
+   "km": 16.0,
+   "freeflow_min": 20
+  },
+  "MG Road": {
+   "km": 9.5,
+   "freeflow_min": 12
+  },
+  "Bellandur": {
+   "km": 24.0,
+   "freeflow_min": 29
+  },
+  "Yeshwanthpur": {
+   "km": 7.1,
+   "freeflow_min": 10
+  }
+ },
+ "Hennur": {
+  "Manyata Tech Park": {
+   "km": 5.5,
+   "freeflow_min": 8
+  },
+  "Whitefield": {
+   "km": 17.5,
+   "freeflow_min": 22
+  },
+  "Electronic City": {
+   "km": 29.4,
+   "freeflow_min": 36
+  },
+  "Koramangala": {
+   "km": 17.0,
+   "freeflow_min": 21
+  },
+  "MG Road": {
+   "km": 11.2,
+   "freeflow_min": 14
+  },
+  "Bellandur": {
+   "km": 22.9,
+   "freeflow_min": 29
+  },
+  "Yeshwanthpur": {
+   "km": 15.1,
+   "freeflow_min": 18
+  }
+ },
+ "Yelahanka": {
+  "Manyata Tech Park": {
+   "km": 8.5,
+   "freeflow_min": 14
+  },
+  "Whitefield": {
+   "km": 28.2,
+   "freeflow_min": 33
+  },
+  "Electronic City": {
+   "km": 34.5,
+   "freeflow_min": 41
+  },
+  "Koramangala": {
+   "km": 23.3,
+   "freeflow_min": 27
+  },
+  "MG Road": {
+   "km": 16.8,
+   "freeflow_min": 19
+  },
+  "Bellandur": {
+   "km": 31.4,
+   "freeflow_min": 37
+  },
+  "Yeshwanthpur": {
+   "km": 14.3,
+   "freeflow_min": 17
+  }
+ },
+ "Koramangala": {
+  "Manyata Tech Park": {
+   "km": 15.6,
+   "freeflow_min": 20
+  },
+  "Whitefield": {
+   "km": 18.3,
+   "freeflow_min": 21
+  },
+  "Electronic City": {
+   "km": 12.4,
+   "freeflow_min": 16
+  },
+  "Koramangala": {
+   "km": 0.0,
+   "freeflow_min": 0
+  },
+  "MG Road": {
+   "km": 7.1,
+   "freeflow_min": 11
+  },
+  "Bellandur": {
+   "km": 8.8,
+   "freeflow_min": 11
+  },
+  "Yeshwanthpur": {
+   "km": 16.5,
+   "freeflow_min": 19
+  }
+ },
+ "HSR Layout": {
+  "Manyata Tech Park": {
+   "km": 20.8,
+   "freeflow_min": 26
+  },
+  "Whitefield": {
+   "km": 16.8,
+   "freeflow_min": 21
+  },
+  "Electronic City": {
+   "km": 10.2,
+   "freeflow_min": 14
+  },
+  "Koramangala": {
+   "km": 5.9,
+   "freeflow_min": 7
+  },
+  "MG Road": {
+   "km": 12.3,
+   "freeflow_min": 17
+  },
+  "Bellandur": {
+   "km": 6.3,
+   "freeflow_min": 8
+  },
+  "Yeshwanthpur": {
+   "km": 21.0,
+   "freeflow_min": 24
+  }
+ },
+ "Indiranagar": {
+  "Manyata Tech Park": {
+   "km": 11.9,
+   "freeflow_min": 14
+  },
+  "Whitefield": {
+   "km": 12.8,
+   "freeflow_min": 14
+  },
+  "Electronic City": {
+   "km": 20.8,
+   "freeflow_min": 26
+  },
+  "Koramangala": {
+   "km": 8.4,
+   "freeflow_min": 10
+  },
+  "MG Road": {
+   "km": 5.6,
+   "freeflow_min": 7
+  },
+  "Bellandur": {
+   "km": 13.1,
+   "freeflow_min": 17
+  },
+  "Yeshwanthpur": {
+   "km": 12.4,
+   "freeflow_min": 15
+  }
+ },
+ "Whitefield": {
+  "Manyata Tech Park": {
+   "km": 22.9,
+   "freeflow_min": 28
+  },
+  "Whitefield": {
+   "km": 4.8,
+   "freeflow_min": 6
+  },
+  "Electronic City": {
+   "km": 21.6,
+   "freeflow_min": 23
+  },
+  "Koramangala": {
+   "km": 18.6,
+   "freeflow_min": 22
+  },
+  "MG Road": {
+   "km": 19.3,
+   "freeflow_min": 23
+  },
+  "Bellandur": {
+   "km": 10.6,
+   "freeflow_min": 13
+  },
+  "Yeshwanthpur": {
+   "km": 26.7,
+   "freeflow_min": 30
+  }
+ },
+ "Marathahalli": {
+  "Manyata Tech Park": {
+   "km": 16.5,
+   "freeflow_min": 23
+  },
+  "Whitefield": {
+   "km": 8.0,
+   "freeflow_min": 9
+  },
+  "Electronic City": {
+   "km": 19.7,
+   "freeflow_min": 25
+  },
+  "Koramangala": {
+   "km": 10.9,
+   "freeflow_min": 18
+  },
+  "MG Road": {
+   "km": 13.3,
+   "freeflow_min": 18
+  },
+  "Bellandur": {
+   "km": 5.6,
+   "freeflow_min": 9
+  },
+  "Yeshwanthpur": {
+   "km": 20.6,
+   "freeflow_min": 25
+  }
+ },
+ "Electronic City": {
+  "Manyata Tech Park": {
+   "km": 28.2,
+   "freeflow_min": 36
+  },
+  "Whitefield": {
+   "km": 27.6,
+   "freeflow_min": 31
+  },
+  "Electronic City": {
+   "km": 2.4,
+   "freeflow_min": 4
+  },
+  "Koramangala": {
+   "km": 14.1,
+   "freeflow_min": 17
+  },
+  "MG Road": {
+   "km": 17.8,
+   "freeflow_min": 26
+  },
+  "Bellandur": {
+   "km": 14.8,
+   "freeflow_min": 20
+  },
+  "Yeshwanthpur": {
+   "km": 26.4,
+   "freeflow_min": 32
+  }
+ },
+ "Bellandur": {
+  "Manyata Tech Park": {
+   "km": 20.3,
+   "freeflow_min": 28
+  },
+  "Whitefield": {
+   "km": 11.8,
+   "freeflow_min": 15
+  },
+  "Electronic City": {
+   "km": 13.8,
+   "freeflow_min": 19
+  },
+  "Koramangala": {
+   "km": 8.3,
+   "freeflow_min": 10
+  },
+  "MG Road": {
+   "km": 14.7,
+   "freeflow_min": 20
+  },
+  "Bellandur": {
+   "km": 1.8,
+   "freeflow_min": 3
+  },
+  "Yeshwanthpur": {
+   "km": 23.3,
+   "freeflow_min": 28
+  }
+ },
+ "Yeshwanthpur": {
+  "Manyata Tech Park": {
+   "km": 12.5,
+   "freeflow_min": 17
+  },
+  "Whitefield": {
+   "km": 26.0,
+   "freeflow_min": 31
+  },
+  "Electronic City": {
+   "km": 28.1,
+   "freeflow_min": 35
+  },
+  "Koramangala": {
+   "km": 17.7,
+   "freeflow_min": 22
+  },
+  "MG Road": {
+   "km": 12.4,
+   "freeflow_min": 15
+  },
+  "Bellandur": {
+   "km": 25.0,
+   "freeflow_min": 30
+  },
+  "Yeshwanthpur": {
+   "km": 3.2,
+   "freeflow_min": 4
+  }
+ },
+ "Jayanagar": {
+  "Manyata Tech Park": {
+   "km": 18.0,
+   "freeflow_min": 24
+  },
+  "Whitefield": {
+   "km": 22.6,
+   "freeflow_min": 28
+  },
+  "Electronic City": {
+   "km": 14.3,
+   "freeflow_min": 19
+  },
+  "Koramangala": {
+   "km": 6.7,
+   "freeflow_min": 9
+  },
+  "MG Road": {
+   "km": 9.1,
+   "freeflow_min": 13
+  },
+  "Bellandur": {
+   "km": 12.1,
+   "freeflow_min": 16
+  },
+  "Yeshwanthpur": {
+   "km": 14.6,
+   "freeflow_min": 17
+  }
+ },
+ "Malleshwaram": {
+  "Manyata Tech Park": {
+   "km": 9.9,
+   "freeflow_min": 14
+  },
+  "Whitefield": {
+   "km": 22.8,
+   "freeflow_min": 26
+  },
+  "Electronic City": {
+   "km": 23.7,
+   "freeflow_min": 31
+  },
+  "Koramangala": {
+   "km": 13.2,
+   "freeflow_min": 18
+  },
+  "MG Road": {
+   "km": 7.1,
+   "freeflow_min": 11
+  },
+  "Bellandur": {
+   "km": 20.6,
+   "freeflow_min": 26
+  },
+  "Yeshwanthpur": {
+   "km": 3.1,
+   "freeflow_min": 4
+  }
+ },
+ "JP Nagar": {
+  "Manyata Tech Park": {
+   "km": 20.6,
+   "freeflow_min": 26
+  },
+  "Whitefield": {
+   "km": 25.2,
+   "freeflow_min": 30
+  },
+  "Electronic City": {
+   "km": 16.9,
+   "freeflow_min": 21
+  },
+  "Koramangala": {
+   "km": 9.2,
+   "freeflow_min": 12
+  },
+  "MG Road": {
+   "km": 11.7,
+   "freeflow_min": 15
+  },
+  "Bellandur": {
+   "km": 14.7,
+   "freeflow_min": 18
+  },
+  "Yeshwanthpur": {
+   "km": 16.6,
+   "freeflow_min": 19
+  }
+ },
+ "BTM Layout": {
+  "Manyata Tech Park": {
+   "km": 22.5,
+   "freeflow_min": 30
+  },
+  "Whitefield": {
+   "km": 20.1,
+   "freeflow_min": 26
+  },
+  "Electronic City": {
+   "km": 11.8,
+   "freeflow_min": 16
+  },
+  "Koramangala": {
+   "km": 6.1,
+   "freeflow_min": 11
+  },
+  "MG Road": {
+   "km": 12.1,
+   "freeflow_min": 20
+  },
+  "Bellandur": {
+   "km": 9.6,
+   "freeflow_min": 14
+  },
+  "Yeshwanthpur": {
+   "km": 20.6,
+   "freeflow_min": 26
+  }
+ }
+}

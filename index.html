@@ -22,7 +22,7 @@
         <button type="button" class="lang-btn" data-lang="hi" aria-pressed="false" aria-label="Hindi" lang="hi">हिन्दी</button>
       </div>
       <div class="header-disclaimer">
-        ⚠️ All data is <strong>indicative</strong> · This is <strong>guidance only, not legal advice</strong>
+        📊 Rents from <strong>2,524 live listings</strong> (Nov 2026) · commutes from OpenStreetMap + TomTom 2025 · flood spots from news reports · <strong>guidance only, not legal advice</strong>
       </div>
     </div>
   </header>
@@ -141,7 +141,7 @@
     <!-- ── Step 3: Area Finder ────────────────────────────────────────── -->
     <section class="card hidden" id="section-areas">
       <h2 class="section-title"><span class="step-badge">3</span> <span data-i18n="s3">Best Areas for You</span></h2>
-      <p class="section-note">Ranked by commute (40%) · rent fit (40%) · owner-rule fit (20%), minus a monsoon/civic risk penalty (flooding, water source, power cuts). Data is indicative: verify on your visit.</p>
+      <p class="section-note">Ranked by commute (40%) · rent fit (40%) · owner-rule fit (20%), minus a monsoon/civic risk penalty (flooding, water source). 9 AM times use OpenStreetMap road routes scaled by TomTom's 2025 Bengaluru congestion. A <strong>?</strong> marks a rating with no specific source. Verify on your visit.</p>
       <div id="areas-output"></div>
       <details class="trace-panel">
         <summary data-i18n="trace">▸ Agent Trace</summary>
@@ -152,7 +152,7 @@
     <!-- ── Step 4: Rent Check ─────────────────────────────────────────── -->
     <section class="card hidden" id="section-rent">
       <h2 class="section-title"><span class="step-badge">4</span> <span data-i18n="s4">Fair-Rent Check</span></h2>
-      <p class="section-note">Enter a quoted rent to see if it's fair for the area. Data is indicative.</p>
+      <p class="section-note">Enter a quoted rent to see if it's fair for the area. Compared against live NoBroker listings within 2 km (pulled 15 Nov 2026).</p>
       <div class="rent-form-row">
         <div class="field">
           <label for="rent-area">Area</label>
@@ -236,6 +236,7 @@
   <script src="data/tasks.js"></script>
   <script src="data/areas.js"></script>
   <script src="data/rent.js"></script>
+  <script src="data/sourced.js"></script>
   <script src="data/redflags.js"></script>
 
   <!-- Modules -->

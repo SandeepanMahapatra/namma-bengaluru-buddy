@@ -106,8 +106,8 @@ window.DATA_REDFLAGS = [
     type: "numeric",
     extractPattern: "(?:security\\s+)?deposit[^₹\\d]{0,30}(?:of\\s+)?(?:rs\\.?|inr|₹)?\\s*([\\d,]+)",
     condition: "deposit > rent * 6",
-    explanation: "Standard deposit in Bengaluru is 2–3 months' rent (up to 6 months for furnished). Anything beyond 6 months is excessive.",
-    negotiationAsk: "Please reduce the deposit to 2–3 months' rent (₹{rentX3}). Deposits above 6 months' rent are not standard.",
+    explanation: "Across 2,524 live Bengaluru listings (NoBroker, Nov 2026) the median deposit is 4.6 months' rent and 75% ask under 7 months. Above 6 months is out of line with the market.",
+    negotiationAsk: "Please reduce the deposit to 5 months' rent (₹{rentNorm}), which is the market median for Bengaluru listings right now.",
     riskPoints: 20
   },
   {

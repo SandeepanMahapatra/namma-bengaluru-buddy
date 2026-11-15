@@ -1,315 +1,501 @@
-// Each entry key: "{AreaName}_{BHK}" e.g. "Hebbal_1BHK"
-// Each entry has:
-//   points: array of { rent, date (YYYY-MM), source }
-//   computed: { median, low (p10), high (p90), iqr, n, months_old_p50 }
-// The app uses `computed` for display and confidence; `points` for recency calc.
-// All data is INDICATIVE — not live market data.
-
-(function() {
-  function computeStats(points) {
-    if (!points || points.length === 0) return null;
-    var vals = points.map(function(p) { return p.rent; }).sort(function(a, b) { return a - b; });
-    var n = vals.length;
-    var median = n % 2 === 0 ? (vals[n/2-1] + vals[n/2]) / 2 : vals[Math.floor(n/2)];
-    var q1 = vals[Math.floor(n * 0.25)];
-    var q3 = vals[Math.floor(n * 0.75)];
-    var low = vals[Math.floor(n * 0.10)] || vals[0];
-    var high = vals[Math.min(Math.floor(n * 0.90), n-1)];
-    var iqr = q3 - q1;
-    // Recency: months since each data point, find median age
-    var now = new Date("2026-11-01");
-    var ages = points.map(function(p) {
-      var d = new Date(p.date + "-01");
-      return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
-    }).sort(function(a, b) { return a - b; });
-    var months_old_p50 = ages[Math.floor(ages.length / 2)];
-    return { median: median, low: low, high: high, iqr: iqr, n: n, months_old_p50: months_old_p50 };
-  }
-
-  var rawData = {
-
-    // ── Hebbal (High confidence — 18 points) ──────────────────────────────
-    "Hebbal_1BHK": [
-      { rent: 16000, date: "2026-08", source: "NoBroker" },
-      { rent: 17500, date: "2026-07", source: "MagicBricks" },
-      { rent: 18000, date: "2026-09", source: "NoBroker" },
-      { rent: 15500, date: "2026-06", source: "99acres" },
-      { rent: 19000, date: "2026-10", source: "NoBroker" },
-      { rent: 17000, date: "2026-08", source: "Local broker" },
-      { rent: 16500, date: "2026-07", source: "NoBroker" },
-      { rent: 18500, date: "2026-09", source: "MagicBricks" },
-      { rent: 17000, date: "2026-05", source: "99acres" },
-      { rent: 20000, date: "2026-10", source: "NoBroker" },
-      { rent: 15000, date: "2026-04", source: "Local broker" },
-      { rent: 18000, date: "2026-06", source: "NoBroker" },
-      { rent: 16800, date: "2026-08", source: "MagicBricks" },
-      { rent: 17200, date: "2026-09", source: "99acres" },
-      { rent: 19500, date: "2026-10", source: "NoBroker" },
-      { rent: 16000, date: "2026-07", source: "Local broker" },
-      { rent: 18000, date: "2026-11", source: "NoBroker" },
-      { rent: 17500, date: "2026-11", source: "MagicBricks" }
-    ],
-    "Hebbal_2BHK": [
-      { rent: 25000, date: "2026-08", source: "NoBroker" },
-      { rent: 28000, date: "2026-09", source: "MagicBricks" },
-      { rent: 27000, date: "2026-07", source: "99acres" },
-      { rent: 30000, date: "2026-10", source: "NoBroker" },
-      { rent: 26000, date: "2026-06", source: "Local broker" },
-      { rent: 28500, date: "2026-09", source: "NoBroker" },
-      { rent: 29000, date: "2026-10", source: "MagicBricks" },
-      { rent: 24000, date: "2026-05", source: "99acres" },
-      { rent: 27500, date: "2026-08", source: "NoBroker" },
-      { rent: 31000, date: "2026-11", source: "NoBroker" },
-      { rent: 26500, date: "2026-07", source: "Local broker" },
-      { rent: 28000, date: "2026-11", source: "MagicBricks" },
-      { rent: 29500, date: "2026-10", source: "99acres" },
-      { rent: 27000, date: "2026-09", source: "NoBroker" },
-      { rent: 25500, date: "2026-06", source: "Local broker" },
-      { rent: 30000, date: "2026-11", source: "NoBroker" }
-    ],
-    "Hebbal_3BHK": [
-      { rent: 38000, date: "2026-08", source: "NoBroker" },
-      { rent: 42000, date: "2026-09", source: "MagicBricks" },
-      { rent: 40000, date: "2026-10", source: "99acres" },
-      { rent: 44000, date: "2026-11", source: "NoBroker" },
-      { rent: 39000, date: "2026-07", source: "Local broker" },
-      { rent: 41000, date: "2026-10", source: "NoBroker" },
-      { rent: 43000, date: "2026-11", source: "MagicBricks" },
-      { rent: 37000, date: "2026-06", source: "99acres" },
-      { rent: 42500, date: "2026-09", source: "NoBroker" },
-      { rent: 40500, date: "2026-08", source: "Local broker" },
-      { rent: 38500, date: "2026-07", source: "NoBroker" },
-      { rent: 41500, date: "2026-10", source: "MagicBricks" },
-      { rent: 44500, date: "2026-11", source: "NoBroker" },
-      { rent: 39500, date: "2026-09", source: "99acres" },
-      { rent: 42000, date: "2026-11", source: "NoBroker" },
-      { rent: 40000, date: "2026-08", source: "Local broker" }
-    ],
-
-    // ── Hennur (High confidence — 16 points) ──────────────────────────────
-    "Hennur_1BHK": [
-      { rent: 13500, date: "2026-08", source: "NoBroker" },
-      { rent: 15000, date: "2026-09", source: "MagicBricks" },
-      { rent: 14000, date: "2026-07", source: "NoBroker" },
-      { rent: 16000, date: "2026-10", source: "99acres" },
-      { rent: 13000, date: "2026-06", source: "Local broker" },
-      { rent: 15500, date: "2026-11", source: "NoBroker" },
-      { rent: 14500, date: "2026-09", source: "MagicBricks" },
-      { rent: 13800, date: "2026-08", source: "99acres" },
-      { rent: 15000, date: "2026-10", source: "NoBroker" },
-      { rent: 16500, date: "2026-11", source: "NoBroker" },
-      { rent: 13200, date: "2026-07", source: "Local broker" },
-      { rent: 14800, date: "2026-09", source: "MagicBricks" },
-      { rent: 15200, date: "2026-10", source: "NoBroker" },
-      { rent: 14000, date: "2026-08", source: "99acres" },
-      { rent: 15800, date: "2026-11", source: "NoBroker" },
-      { rent: 14200, date: "2026-07", source: "Local broker" }
-    ],
-    "Hennur_2BHK": [
-      { rent: 21000, date: "2026-08", source: "NoBroker" },
-      { rent: 23000, date: "2026-09", source: "MagicBricks" },
-      { rent: 22000, date: "2026-07", source: "99acres" },
-      { rent: 24500, date: "2026-10", source: "NoBroker" },
-      { rent: 20000, date: "2026-06", source: "Local broker" },
-      { rent: 23500, date: "2026-11", source: "NoBroker" },
-      { rent: 22500, date: "2026-09", source: "MagicBricks" },
-      { rent: 21500, date: "2026-08", source: "99acres" },
-      { rent: 24000, date: "2026-10", source: "NoBroker" },
-      { rent: 25000, date: "2026-11", source: "NoBroker" },
-      { rent: 20500, date: "2026-07", source: "Local broker" },
-      { rent: 23000, date: "2026-09", source: "MagicBricks" },
-      { rent: 22000, date: "2026-10", source: "NoBroker" },
-      { rent: 21000, date: "2026-08", source: "99acres" },
-      { rent: 24000, date: "2026-11", source: "NoBroker" },
-      { rent: 22500, date: "2026-07", source: "Local broker" }
-    ],
-
-    // ── HSR Layout (High confidence — 15 points) ──────────────────────────
-    "HSR Layout_1BHK": [
-      { rent: 18000, date: "2026-08", source: "NoBroker" },
-      { rent: 20000, date: "2026-09", source: "MagicBricks" },
-      { rent: 19000, date: "2026-07", source: "99acres" },
-      { rent: 21000, date: "2026-10", source: "NoBroker" },
-      { rent: 17500, date: "2026-06", source: "Local broker" },
-      { rent: 20500, date: "2026-11", source: "NoBroker" },
-      { rent: 19500, date: "2026-09", source: "MagicBricks" },
-      { rent: 18500, date: "2026-08", source: "99acres" },
-      { rent: 20000, date: "2026-10", source: "NoBroker" },
-      { rent: 22000, date: "2026-11", source: "NoBroker" },
-      { rent: 17000, date: "2026-07", source: "Local broker" },
-      { rent: 19000, date: "2026-09", source: "MagicBricks" },
-      { rent: 21500, date: "2026-10", source: "NoBroker" },
-      { rent: 18000, date: "2026-08", source: "99acres" },
-      { rent: 20500, date: "2026-11", source: "NoBroker" }
-    ],
-    "HSR Layout_2BHK": [
-      { rent: 29000, date: "2026-08", source: "NoBroker" },
-      { rent: 32000, date: "2026-09", source: "MagicBricks" },
-      { rent: 30000, date: "2026-07", source: "99acres" },
-      { rent: 34000, date: "2026-10", source: "NoBroker" },
-      { rent: 28000, date: "2026-06", source: "Local broker" },
-      { rent: 33000, date: "2026-11", source: "NoBroker" },
-      { rent: 31000, date: "2026-09", source: "MagicBricks" },
-      { rent: 30500, date: "2026-08", source: "99acres" },
-      { rent: 32500, date: "2026-10", source: "NoBroker" },
-      { rent: 35000, date: "2026-11", source: "NoBroker" },
-      { rent: 27000, date: "2026-07", source: "Local broker" },
-      { rent: 31500, date: "2026-09", source: "MagicBricks" },
-      { rent: 33500, date: "2026-10", source: "NoBroker" },
-      { rent: 29500, date: "2026-08", source: "99acres" },
-      { rent: 32000, date: "2026-11", source: "NoBroker" }
-    ],
-    "HSR Layout_3BHK": [
-      { rent: 46000, date: "2026-08", source: "NoBroker" },
-      { rent: 50000, date: "2026-09", source: "MagicBricks" },
-      { rent: 48000, date: "2026-10", source: "NoBroker" },
-      { rent: 52000, date: "2026-11", source: "NoBroker" },
-      { rent: 44000, date: "2026-07", source: "Local broker" },
-      { rent: 51000, date: "2026-10", source: "MagicBricks" },
-      { rent: 47000, date: "2026-09", source: "99acres" },
-      { rent: 49000, date: "2026-11", source: "NoBroker" },
-      { rent: 45000, date: "2026-08", source: "Local broker" },
-      { rent: 50500, date: "2026-10", source: "NoBroker" },
-      { rent: 48500, date: "2026-11", source: "MagicBricks" },
-      { rent: 46500, date: "2026-09", source: "99acres" },
-      { rent: 51500, date: "2026-11", source: "NoBroker" },
-      { rent: 47500, date: "2026-08", source: "Local broker" },
-      { rent: 49500, date: "2026-10", source: "NoBroker" }
-    ],
-
-    // ── Yelahanka (Low confidence — 3 points, will fall back) ─────────────
-    "Yelahanka_2BHK": [
-      { rent: 19000, date: "2025-06", source: "NoBroker" },
-      { rent: 21000, date: "2025-03", source: "MagicBricks" },
-      { rent: 20000, date: "2024-11", source: "Local broker" }
-    ],
-
-    // ── Koramangala (Medium confidence — 12 points) ────────────────────────
-    "Koramangala_1BHK": [
-      { rent: 20000, date: "2026-07", source: "NoBroker" },
-      { rent: 22000, date: "2026-09", source: "MagicBricks" },
-      { rent: 21000, date: "2026-08", source: "99acres" },
-      { rent: 23000, date: "2026-10", source: "NoBroker" },
-      { rent: 19500, date: "2026-06", source: "Local broker" },
-      { rent: 22500, date: "2026-11", source: "NoBroker" },
-      { rent: 20500, date: "2026-09", source: "MagicBricks" },
-      { rent: 21500, date: "2026-08", source: "99acres" },
-      { rent: 23500, date: "2026-10", source: "NoBroker" },
-      { rent: 19000, date: "2026-07", source: "Local broker" },
-      { rent: 22000, date: "2026-11", source: "NoBroker" },
-      { rent: 21000, date: "2026-09", source: "MagicBricks" }
-    ],
-    "Koramangala_2BHK": [
-      { rent: 30000, date: "2026-07", source: "NoBroker" },
-      { rent: 33000, date: "2026-09", source: "MagicBricks" },
-      { rent: 31000, date: "2026-08", source: "99acres" },
-      { rent: 35000, date: "2026-10", source: "NoBroker" },
-      { rent: 29000, date: "2026-06", source: "Local broker" },
-      { rent: 34000, date: "2026-11", source: "NoBroker" },
-      { rent: 32000, date: "2026-09", source: "MagicBricks" },
-      { rent: 31500, date: "2026-08", source: "99acres" },
-      { rent: 36000, date: "2026-10", source: "NoBroker" },
-      { rent: 28000, date: "2026-07", source: "Local broker" },
-      { rent: 33500, date: "2026-11", source: "NoBroker" },
-      { rent: 32000, date: "2026-09", source: "MagicBricks" }
-    ],
-    "Koramangala_3BHK": [
-      { rent: 50000, date: "2026-08", source: "NoBroker" },
-      { rent: 55000, date: "2026-09", source: "MagicBricks" },
-      { rent: 52000, date: "2026-10", source: "NoBroker" },
-      { rent: 58000, date: "2026-11", source: "NoBroker" },
-      { rent: 48000, date: "2026-07", source: "Local broker" },
-      { rent: 56000, date: "2026-10", source: "MagicBricks" },
-      { rent: 51000, date: "2026-09", source: "99acres" },
-      { rent: 54000, date: "2026-11", source: "NoBroker" }
-    ],
-
-    // ── Other areas (smaller datasets for variety) ─────────────────────────
-    "Whitefield_2BHK": [
-      { rent: 27000, date: "2026-08", source: "NoBroker" },
-      { rent: 30000, date: "2026-09", source: "MagicBricks" },
-      { rent: 28000, date: "2026-10", source: "NoBroker" },
-      { rent: 32000, date: "2026-11", source: "NoBroker" },
-      { rent: 26000, date: "2026-07", source: "Local broker" },
-      { rent: 31000, date: "2026-11", source: "MagicBricks" },
-      { rent: 29000, date: "2026-10", source: "99acres" },
-      { rent: 27500, date: "2026-09", source: "NoBroker" }
-    ],
-    "Indiranagar_2BHK": [
-      { rent: 35000, date: "2026-08", source: "NoBroker" },
-      { rent: 38000, date: "2026-09", source: "MagicBricks" },
-      { rent: 36000, date: "2026-10", source: "NoBroker" },
-      { rent: 40000, date: "2026-11", source: "NoBroker" },
-      { rent: 34000, date: "2026-07", source: "Local broker" },
-      { rent: 39000, date: "2026-11", source: "MagicBricks" },
-      { rent: 37000, date: "2026-10", source: "99acres" }
-    ],
-    "Marathahalli_1BHK": [
-      { rent: 15000, date: "2026-08", source: "NoBroker" },
-      { rent: 17000, date: "2026-09", source: "MagicBricks" },
-      { rent: 16000, date: "2026-10", source: "NoBroker" },
-      { rent: 18000, date: "2026-11", source: "NoBroker" },
-      { rent: 14500, date: "2026-07", source: "Local broker" }
-    ],
-    "Marathahalli_2BHK": [
-      { rent: 24000, date: "2026-08", source: "NoBroker" },
-      { rent: 26000, date: "2026-09", source: "MagicBricks" },
-      { rent: 25000, date: "2026-10", source: "NoBroker" },
-      { rent: 27000, date: "2026-11", source: "NoBroker" },
-      { rent: 23000, date: "2026-07", source: "Local broker" },
-      { rent: 26500, date: "2026-11", source: "MagicBricks" }
-    ],
-    "Electronic City_1BHK": [
-      { rent: 12000, date: "2026-08", source: "NoBroker" },
-      { rent: 14000, date: "2026-09", source: "MagicBricks" },
-      { rent: 13000, date: "2026-10", source: "NoBroker" },
-      { rent: 15000, date: "2026-11", source: "NoBroker" },
-      { rent: 11500, date: "2026-07", source: "Local broker" }
-    ],
-    "Electronic City_2BHK": [
-      { rent: 20000, date: "2026-08", source: "NoBroker" },
-      { rent: 22000, date: "2026-09", source: "MagicBricks" },
-      { rent: 21000, date: "2026-10", source: "NoBroker" },
-      { rent: 23000, date: "2026-11", source: "NoBroker" },
-      { rent: 19000, date: "2026-07", source: "Local broker" },
-      { rent: 22500, date: "2026-11", source: "MagicBricks" }
-    ],
-    "Bellandur_2BHK": [
-      { rent: 25000, date: "2026-09", source: "NoBroker" },
-      { rent: 28000, date: "2026-10", source: "MagicBricks" },
-      { rent: 27000, date: "2026-11", source: "NoBroker" },
-      { rent: 29000, date: "2026-11", source: "MagicBricks" }
-    ],
-    "Yeshwanthpur_2BHK": [
-      { rent: 23000, date: "2026-08", source: "NoBroker" },
-      { rent: 25000, date: "2026-09", source: "MagicBricks" },
-      { rent: 24000, date: "2026-10", source: "NoBroker" },
-      { rent: 26000, date: "2026-11", source: "NoBroker" },
-      { rent: 22000, date: "2026-07", source: "Local broker" }
-    ],
-    "JP Nagar_2BHK": [
-      { rent: 25000, date: "2026-08", source: "NoBroker" },
-      { rent: 27000, date: "2026-09", source: "MagicBricks" },
-      { rent: 26000, date: "2026-10", source: "NoBroker" },
-      { rent: 28000, date: "2026-11", source: "NoBroker" }
-    ],
-    "BTM Layout_1BHK": [
-      { rent: 14000, date: "2026-08", source: "NoBroker" },
-      { rent: 16000, date: "2026-09", source: "MagicBricks" },
-      { rent: 15000, date: "2026-10", source: "NoBroker" },
-      { rent: 17000, date: "2026-11", source: "NoBroker" },
-      { rent: 13500, date: "2026-07", source: "Local broker" }
-    ]
-  };
-
-  // Build window.DATA_RENT with computed stats
-  window.DATA_RENT = {};
-  for (var key in rawData) {
-    if (rawData.hasOwnProperty(key)) {
-      window.DATA_RENT[key] = {
-        points: rawData[key],
-        computed: computeStats(rawData[key])
-      };
-    }
-  }
-})();
+// GENERATED by scripts/build_data.py from data/sources/rent_nobroker_2026-11.json. Do not edit by hand.
+// Live rental listings pulled from NoBroker search (2 km radius around each locality centre) on 2026-11-15. Values per BHK: [n, p10, p25, median, p75, p90] monthly rent in INR. 2,524 listings total; 99% were listed or updated in Oct-Nov 2026. Deposit ratio across all listings: median 4.6x rent, p75 6.9x, p90 10.0x. No owner or contact details were stored.
+window.DATA_RENT_SOURCE = "NoBroker live listings within 2 km of each locality, pulled 2026-11-15 (2,524 listings)";
+window.DATA_DEPOSIT_MONTHS = {"median": 4.6, "p75": 6.9, "p90": 10.0};
+window.DATA_RENT = {
+ "Hebbal_1BHK": {
+  "computed": {
+   "median": 10000,
+   "low": 6000,
+   "high": 15000,
+   "iqr": 4000,
+   "n": 57,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=57)"
+ },
+ "Hebbal_2BHK": {
+  "computed": {
+   "median": 17000,
+   "low": 13000,
+   "high": 27000,
+   "iqr": 5000,
+   "n": 84,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=84)"
+ },
+ "Hebbal_3BHK": {
+  "computed": {
+   "median": 50000,
+   "low": 24000,
+   "high": 70000,
+   "iqr": 25000,
+   "n": 19,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=19)"
+ },
+ "Hennur_1BHK": {
+  "computed": {
+   "median": 13000,
+   "low": 8500,
+   "high": 18000,
+   "iqr": 5500,
+   "n": 42,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=42)"
+ },
+ "Hennur_2BHK": {
+  "computed": {
+   "median": 22000,
+   "low": 15000,
+   "high": 28000,
+   "iqr": 8000,
+   "n": 91,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=91)"
+ },
+ "Hennur_3BHK": {
+  "computed": {
+   "median": 34000,
+   "low": 27000,
+   "high": 50000,
+   "iqr": 10000,
+   "n": 31,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=31)"
+ },
+ "Yelahanka_1BHK": {
+  "computed": {
+   "median": 12000,
+   "low": 8000,
+   "high": 18000,
+   "iqr": 5000,
+   "n": 37,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=37)"
+ },
+ "Yelahanka_2BHK": {
+  "computed": {
+   "median": 25000,
+   "low": 15000,
+   "high": 40000,
+   "iqr": 14000,
+   "n": 103,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=103)"
+ },
+ "Yelahanka_3BHK": {
+  "computed": {
+   "median": 40000,
+   "low": 30000,
+   "high": 75000,
+   "iqr": 15000,
+   "n": 41,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=41)"
+ },
+ "Koramangala_1BHK": {
+  "computed": {
+   "median": 20000,
+   "low": 12000,
+   "high": 35000,
+   "iqr": 10500,
+   "n": 63,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=63)"
+ },
+ "Koramangala_2BHK": {
+  "computed": {
+   "median": 35000,
+   "low": 18000,
+   "high": 55000,
+   "iqr": 18000,
+   "n": 69,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=69)"
+ },
+ "Koramangala_3BHK": {
+  "computed": {
+   "median": 50000,
+   "low": 30000,
+   "high": 120000,
+   "iqr": 45000,
+   "n": 27,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=27)"
+ },
+ "HSR Layout_1BHK": {
+  "computed": {
+   "median": 22000,
+   "low": 13000,
+   "high": 35000,
+   "iqr": 10000,
+   "n": 57,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=57)"
+ },
+ "HSR Layout_2BHK": {
+  "computed": {
+   "median": 35000,
+   "low": 20000,
+   "high": 50000,
+   "iqr": 20000,
+   "n": 73,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=73)"
+ },
+ "HSR Layout_3BHK": {
+  "computed": {
+   "median": 75000,
+   "low": 45000,
+   "high": 125000,
+   "iqr": 45000,
+   "n": 30,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=30)"
+ },
+ "Indiranagar_1BHK": {
+  "computed": {
+   "median": 18000,
+   "low": 9000,
+   "high": 25000,
+   "iqr": 6000,
+   "n": 52,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=52)"
+ },
+ "Indiranagar_2BHK": {
+  "computed": {
+   "median": 30000,
+   "low": 18000,
+   "high": 55000,
+   "iqr": 20000,
+   "n": 79,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=79)"
+ },
+ "Indiranagar_3BHK": {
+  "computed": {
+   "median": 70000,
+   "low": 40000,
+   "high": 180000,
+   "iqr": 95000,
+   "n": 15,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=15)"
+ },
+ "Whitefield_1BHK": {
+  "computed": {
+   "median": 14000,
+   "low": 10000,
+   "high": 25000,
+   "iqr": 6000,
+   "n": 83,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=83)"
+ },
+ "Whitefield_2BHK": {
+  "computed": {
+   "median": 23000,
+   "low": 15000,
+   "high": 36500,
+   "iqr": 10500,
+   "n": 77,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=77)"
+ },
+ "Whitefield_3BHK": {
+  "computed": {
+   "median": 50000,
+   "low": 30000,
+   "high": 64000,
+   "iqr": 15000,
+   "n": 19,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=19)"
+ },
+ "Marathahalli_1BHK": {
+  "computed": {
+   "median": 16000,
+   "low": 12000,
+   "high": 24998,
+   "iqr": 5000,
+   "n": 92,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=92)"
+ },
+ "Marathahalli_2BHK": {
+  "computed": {
+   "median": 26000,
+   "low": 18000,
+   "high": 36500,
+   "iqr": 9000,
+   "n": 51,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=51)"
+ },
+ "Marathahalli_3BHK": {
+  "computed": {
+   "median": 49500,
+   "low": 22000,
+   "high": 98000,
+   "iqr": 25000,
+   "n": 16,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=16)"
+ },
+ "Electronic City_1BHK": {
+  "computed": {
+   "median": 12500,
+   "low": 7500,
+   "high": 18000,
+   "iqr": 6500,
+   "n": 87,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=87)"
+ },
+ "Electronic City_2BHK": {
+  "computed": {
+   "median": 22000,
+   "low": 14000,
+   "high": 39000,
+   "iqr": 14000,
+   "n": 72,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=72)"
+ },
+ "Electronic City_3BHK": {
+  "computed": {
+   "median": 45000,
+   "low": 30000,
+   "high": 60000,
+   "iqr": 21000,
+   "n": 25,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=25)"
+ },
+ "Bellandur_1BHK": {
+  "computed": {
+   "median": 18000,
+   "low": 13000,
+   "high": 30000,
+   "iqr": 8000,
+   "n": 37,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=37)"
+ },
+ "Bellandur_2BHK": {
+  "computed": {
+   "median": 43000,
+   "low": 25000,
+   "high": 60000,
+   "iqr": 15000,
+   "n": 73,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=73)"
+ },
+ "Bellandur_3BHK": {
+  "computed": {
+   "median": 75000,
+   "low": 49000,
+   "high": 120000,
+   "iqr": 40000,
+   "n": 68,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=68)"
+ },
+ "Yeshwanthpur_1BHK": {
+  "computed": {
+   "median": 8000,
+   "low": 6500,
+   "high": 15000,
+   "iqr": 4000,
+   "n": 70,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=70)"
+ },
+ "Yeshwanthpur_2BHK": {
+  "computed": {
+   "median": 20000,
+   "low": 10000,
+   "high": 42000,
+   "iqr": 15000,
+   "n": 59,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=59)"
+ },
+ "Yeshwanthpur_3BHK": {
+  "computed": {
+   "median": 45000,
+   "low": 25000,
+   "high": 67500,
+   "iqr": 25000,
+   "n": 24,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=24)"
+ },
+ "Jayanagar_1BHK": {
+  "computed": {
+   "median": 15000,
+   "low": 10000,
+   "high": 20000,
+   "iqr": 4500,
+   "n": 54,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=54)"
+ },
+ "Jayanagar_2BHK": {
+  "computed": {
+   "median": 20000,
+   "low": 15000,
+   "high": 40000,
+   "iqr": 12500,
+   "n": 71,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=71)"
+ },
+ "Jayanagar_3BHK": {
+  "computed": {
+   "median": 50000,
+   "low": 30000,
+   "high": 125000,
+   "iqr": 31000,
+   "n": 32,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=32)"
+ },
+ "Malleshwaram_1BHK": {
+  "computed": {
+   "median": 12000,
+   "low": 7750,
+   "high": 20000,
+   "iqr": 5500,
+   "n": 58,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=58)"
+ },
+ "Malleshwaram_2BHK": {
+  "computed": {
+   "median": 22000,
+   "low": 15000,
+   "high": 34000,
+   "iqr": 13000,
+   "n": 67,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=67)"
+ },
+ "Malleshwaram_3BHK": {
+  "computed": {
+   "median": 42000,
+   "low": 25000,
+   "high": 75000,
+   "iqr": 28000,
+   "n": 38,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=38)"
+ },
+ "JP Nagar_1BHK": {
+  "computed": {
+   "median": 13000,
+   "low": 8500,
+   "high": 20000,
+   "iqr": 7000,
+   "n": 49,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=49)"
+ },
+ "JP Nagar_2BHK": {
+  "computed": {
+   "median": 20000,
+   "low": 14000,
+   "high": 34000,
+   "iqr": 9000,
+   "n": 99,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=99)"
+ },
+ "JP Nagar_3BHK": {
+  "computed": {
+   "median": 40000,
+   "low": 25000,
+   "high": 50000,
+   "iqr": 16700,
+   "n": 24,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=24)"
+ },
+ "BTM Layout_1BHK": {
+  "computed": {
+   "median": 17000,
+   "low": 10000,
+   "high": 30000,
+   "iqr": 10000,
+   "n": 82,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=82)"
+ },
+ "BTM Layout_2BHK": {
+  "computed": {
+   "median": 25000,
+   "low": 15000,
+   "high": 42000,
+   "iqr": 10000,
+   "n": 73,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=73)"
+ },
+ "BTM Layout_3BHK": {
+  "computed": {
+   "median": 50000,
+   "low": 12000,
+   "high": 75000,
+   "iqr": 29000,
+   "n": 15,
+   "months_old_p50": 0
+  },
+  "source": "NoBroker live listings, 2026-11-15 (n=15)"
+ }
+};

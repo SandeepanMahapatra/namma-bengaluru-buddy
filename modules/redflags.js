@@ -46,9 +46,13 @@ window.RedFlagsModule = (function() {
 
     if (rent) {
       var deposit = depositRule ? extractNumber(text, depositRule.extractPattern) : null;
-      if (deposit && deposit > rent * 3) {
-        items.push({ label: "Excess deposit (above 3 months' rent)", amount: deposit - rent * 3,
-          calc: inr(deposit) + " − 3 × " + inr(rent) });
+      // Baseline = market median deposit from live listings (data/rent.js), rounded to whole months
+      var dm = window.DATA_DEPOSIT_MONTHS || { median: 3 };
+      var normMonths = Math.round(dm.median);
+      if (deposit && deposit > rent * normMonths) {
+        items.push({ label: "Deposit above the market median (" + normMonths + " months' rent)", amount: deposit - rent * normMonths,
+          calc: inr(deposit) + " − " + normMonths + " × " + inr(rent) });
+        trace.push("📊 Deposit norm: median " + dm.median + "× rent across live Bengaluru listings (75% ask under " + dm.p75 + "×). This one asks " + (deposit / rent).toFixed(1) + "×.");
       }
       var pct = increaseRule ? extractNumber(text, increaseRule.extractPattern) : null;
       if (pct && pct > 5) {
@@ -243,9 +247,10 @@ window.RedFlagsModule = (function() {
       negEl.classList.remove("hidden");
       var rentAmt = monthlyRent ? monthlyRent.toLocaleString("en-IN") : "___";
       var rentX3  = monthlyRent ? (monthlyRent * 3).toLocaleString("en-IN") : "___";
+      var rentNorm = monthlyRent ? (monthlyRent * Math.round((window.DATA_DEPOSIT_MONTHS || {median: 3}).median)).toLocaleString("en-IN") : "___";
       var asks = highMedTriggers.map(function(item, i) {
         var ask = item.rule.negotiationAsk || "Please review the " + item.rule.label.toLowerCase() + " clause.";
-        ask = ask.replace("{rentX3}", rentX3).replace("{rentAmt}", rentAmt);
+        ask = ask.replace("{rentX3}", rentX3).replace("{rentNorm}", rentNorm).replace("{rentAmt}", rentAmt);
         return (i + 1) + ". " + item.rule.label + ": " + ask;
       }).join("\n\n");
 

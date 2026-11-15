@@ -42,21 +42,23 @@ window.AreasModule = (function() {
   // Monsoon / civic risk penalty (points off the 0–100 total)
   var RISK_PENALTY = {
     waterlogging: { high: 8, medium: 4, low: 0 },
-    waterSource:  { "tanker-dependent": 4, "mixed": 2, "Cauvery piped": 0 },
-    powerCuts:    { high: 3, medium: 1, low: 0 }
+    waterSource:  { "tanker-dependent": 4, "mixed": 2, "Cauvery piped": 0 }
   };
+  // Power cuts were dropped: no public source compares outages by area.
 
   function riskPenalty(area) {
     if (!area.risk) return 0;
     return (RISK_PENALTY.waterlogging[area.risk.waterlogging] || 0) +
-           (RISK_PENALTY.waterSource[area.risk.waterSource] || 0) +
-           (RISK_PENALTY.powerCuts[area.risk.powerCuts] || 0);
+           (RISK_PENALTY.waterSource[area.risk.waterSource] || 0);
   }
 
-  // Peak (9 AM) vs off-peak (2 PM) commute, derived from the typical time
-  function commuteWindows(minutes) {
-    if (minutes === undefined) return null;
-    return { peak: Math.round(minutes * 1.4), offPeak: Math.max(5, Math.round(minutes * 0.75)) };
+  // 9 AM vs 2 PM commute: OSRM road time scaled by TomTom 2025 congestion (data/sourced.js)
+  function commuteWindows(area, office) {
+    var peak = area.commute_to[office];
+    if (peak === undefined) return null;
+    var off = area.commute_offpeak ? area.commute_offpeak[office] : Math.max(5, Math.round(peak * 0.9));
+    var km = area.commute_km ? area.commute_km[office] : null;
+    return { peak: peak, offPeak: off, km: km };
   }
 
   function suggestedMode(area, minutes, profile) {
@@ -92,13 +94,13 @@ window.AreasModule = (function() {
         " | rent ₹" + (area[rentKey] / 1000).toFixed(0) + "k vs budget ₹" + (budget/1000).toFixed(0) + "k → " + rs +
         " | fit (" + getRelevantFitKeys(profile).join("+") + "): " + fs + "% → " + fs +
         " | base " + base +
-        (area.risk ? " | monsoon/civic risk (flooding " + area.risk.waterlogging + ", water " + area.risk.waterSource +
-          ", power cuts " + area.risk.powerCuts + ") → −" + penalty : "") +
+        (area.risk ? " | monsoon/civic risk (flooding " + area.risk.waterlogging + " [" + area.risk.waterloggingEvidence +
+          "], water " + area.risk.waterSource + " [" + area.risk.waterSourceEvidence + "]) → −" + penalty : "") +
         " | total " + total;
       trace.push(traceDetail);
 
       return { area: area, commuteScore: cs, rentScore: rs, fitScore: fs, total: total, minutes: minutes,
-               penalty: penalty, windows: commuteWindows(minutes), mode: suggestedMode(area, minutes, profile) };
+               penalty: penalty, windows: commuteWindows(area, office), mode: suggestedMode(area, minutes, profile) };
     });
 
     scored.sort(function(a, b) { return b.total - a.total; });
@@ -123,17 +125,23 @@ window.AreasModule = (function() {
       // Commute planning: peak vs off-peak + suggested mode
       if (item.windows) {
         html += "<div class='commute-row'>⏰ 9 AM: <strong>" + item.windows.peak + " min</strong> · 2 PM: " +
-          item.windows.offPeak + " min · Suggested: <strong>" + item.mode + "</strong></div>";
+          item.windows.offPeak + " min" + (item.windows.km !== null && item.windows.km !== undefined ? " · " + item.windows.km + " km" : "") +
+          " · Suggested: <strong>" + item.mode + "</strong></div>";
       }
 
       // Neighbourhood risk chips
       if (a.risk) {
-        html += "<div class='risk-chips' title='" + a.risk.source.replace(/'/g, "&#39;") + "'>" +
-          "<span class='risk-chip " + riskLevelClass(a.risk.waterlogging) + "'>🌧️ Monsoon flooding: " + a.risk.waterlogging + "</span>" +
-          "<span class='risk-chip " + riskLevelClass(a.risk.waterSource) + "'>🚰 Water: " + a.risk.waterSource + "</span>" +
-          "<span class='risk-chip " + riskLevelClass(a.risk.powerCuts) + "'>⚡ Power cuts: " + a.risk.powerCuts + "</span>" +
+        var esc = function(t) { return String(t || "").replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/</g, "&lt;"); };
+        var mark = function(ev) { return ev === "unverified" ? " <span class='risk-unverified' title='No specific source found; best estimate'>?</span>" : ""; };
+        html += "<div class='risk-chips'>" +
+          "<span class='risk-chip " + riskLevelClass(a.risk.waterlogging) + "' title='" + esc(a.risk.waterloggingNote) + "'>🌧️ Monsoon flooding: " + a.risk.waterlogging + mark(a.risk.waterloggingEvidence) + "</span>" +
+          "<span class='risk-chip " + riskLevelClass(a.risk.waterSource) + "' title='" + esc(a.risk.waterSourceNote) + "'>🚰 Water: " + a.risk.waterSource + mark(a.risk.waterSourceEvidence) + "</span>" +
           (item.penalty ? "<span class='risk-penalty'>−" + item.penalty + " risk</span>" : "") +
           "</div>";
+      }
+
+      if (a.risk && a.risk.waterloggingEvidence === "sourced") {
+        html += "<div class='risk-evidence'>📍 " + a.risk.waterloggingNote + "</div>";
       }
 
       // Tags

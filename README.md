@@ -28,23 +28,36 @@ Working professionals relocating to Bengaluru, especially from outside Karnataka
 | **Snapshot card** | One screen showing tasks planned, top area plus 9 AM commute, ₹ at risk, red flags |
 | **Week 1–4 plan** | Builds a dependency graph, topologically sorts it and schedules each task. Paperwork is capped in the joining week, and ticking a task off re-plans. |
 | **Agentic re-plan** | "Simulate: agreement delayed by a week" re-runs the planner, highlights which tasks moved and explains each move in the trace |
-| **Area finder** | Commute 40% + rent fit 40% + owner-rule fit 20%, minus a monsoon/civic risk penalty (flooding, water source, power cuts). Each card shows the 9 AM vs 2 PM commute and a suggested mode (bike, metro + walk, BMTC). |
-| **Fair-rent check** | Median and range from listings. Falls back from locality to BHK ratio to nearby areas to zone, and shows a 0–100 confidence score. |
+| **Area finder** | Commute 40% + rent fit 40% + owner-rule fit 20%, minus a monsoon/civic risk penalty (flooding, water source). Each card shows the 9 AM vs 2 PM commute, road distance, a suggested mode, and the named flood spot behind the rating. |
+| **Fair-rent check** | Median and p10–p90 range from 2,524 live NoBroker listings (pulled 15 Nov 2026). Falls back from locality to BHK ratio to nearby areas to zone, and shows a 0–100 confidence score. |
 | **Agreement checker** | Regex and numeric rules (lock-in, one-sided termination, deposit, escalation, painting deduction and more). Shows a risk score, **money at risk in ₹**, and a ready-to-send negotiation message. |
 | **Agent trace** | Every step explains why: which tasks were skipped or moved, how each score was computed, which clause triggered which rule |
 | **Languages** | English / ಕನ್ನಡ / हिन्दी for headings, buttons and notes |
 
 ## Measurable impact
 
-On the sample agreement, Buddy finds **₹2,50,200 at risk**:
+On the sample agreement, Buddy finds **₹1,90,200 at risk**:
 
 | Item | Amount |
 |---|---|
-| Excess deposit: ₹3,00,000 − 3 × ₹30,000 | ₹2,10,000 |
+| Deposit above the market median: ₹3,00,000 − 5 × ₹30,000 (median deposit across 2,524 live listings is 4.6 months) | ₹1,50,000 |
 | Extra year-2 rent at 12% vs the 5% norm: 7% × ₹30,000 × 12 | ₹25,200 |
 | Fixed painting deduction | ₹15,000 |
 
 It also produces a 21-task plan that fits in four weeks.
+
+## Data sources
+
+All numbers are rebuilt by `python3 scripts/build_data.py` from the files in `data/sources/`:
+
+| Data | Source | How it's used |
+|---|---|---|
+| Rent | 2,524 NoBroker listings within 2 km of each locality, pulled 15 Nov 2026 | Median, p10–p90 and IQR per area and BHK; median deposit (4.6× rent) sets the deposit norm |
+| Commute | Road distance and free-flow time from OpenStreetMap (OSRM) | 9 AM = free flow × 1.94 and 2 PM = × 1.74, from TomTom Traffic Index 2025 congestion for Bengaluru (94.2% morning rush, 74.4% all-day) |
+| Flooding | Named spots in Deccan Herald, The News Minute, Citizen Matters and PTI reports (2019–2025) | Rating plus the spot shown on each card |
+| Water source | BWSSB / Cauvery Stage V reporting, Down To Earth, OpenCity tanker survey 2025, CGWB | Cauvery piped / mixed / tanker-dependent |
+
+Ratings with no specific source are marked **?** in the app. Power cuts were dropped because no source compares outages by area.
 
 ## Privacy and human review
 
@@ -86,8 +99,9 @@ The design principle is **AI at authoring time, rules at runtime**:
 
 ## Limitations
 
-- Rent, commute, flooding, water-source and power-cut data are **indicative**. They're compiled from public reporting and sample listings, not live feeds. Verify everything on a visit.
-- Peak and off-peak commute times are derived from one typical figure using fixed multipliers.
+- Rents are a snapshot of asking prices on one portal (15 Nov 2026), not signed-lease prices.
+- Commute times are modelled from road routes and city-wide congestion, not measured per route. Long trips on fast roads (ORR, elevated expressway) may be quicker; short trips in the core may be slower.
+- 6 of 15 water-source ratings and 3 flood ratings have no specific source (marked **?**).
 - The agreement checker matches patterns. It can miss clauses with unusual wording and doesn't read PDFs.
 
 ## Next steps

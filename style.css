@@ -298,6 +298,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .commute-row { font-size: .86rem; color: var(--text-muted); margin: .6rem 0 .3rem; padding: .45rem .6rem; background: var(--surface2); border-radius: 8px; }
 .commute-row strong { color: var(--text); }
 .risk-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; align-items: center; }
+.risk-unverified { display: inline-grid; place-items: center; width: 1.05em; height: 1.05em; border-radius: 50%; background: currentColor; color: inherit; font-size: .7em; margin-left: .2em; }
+.risk-unverified { background: transparent; border: 1px solid currentColor; }
+.risk-evidence { font-size: .78rem; color: var(--text-muted); margin-top: .45rem; line-height: 1.4; }
 .risk-chip { font-size: .76rem; font-weight: 600; border-radius: 999px; padding: .15rem .6rem; border: 1px solid; }
 .risk-low  { color: #166534; background: #ecf8f0; border-color: #9fdcb5; }
 .risk-med  { color: #8a4b00; background: #fff4e0; border-color: #f3c77a; }

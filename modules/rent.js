@@ -38,7 +38,7 @@ window.RentModule = (function() {
 
     // Tier 1: direct
     if (window.DATA_RENT[key] && window.DATA_RENT[key].computed) {
-      trace.push("✅ Tier 1 (direct): found <strong>" + key + "</strong> — " + window.DATA_RENT[key].computed.n + " data points");
+      trace.push("✅ Tier 1 (direct): found <strong>" + key + "</strong> — " + window.DATA_RENT[key].computed.n + " live listings (" + (window.DATA_RENT[key].source || "sample data") + ")");
       return { computed: window.DATA_RENT[key].computed, proxyWeight: 1.0, tier: "direct" };
     }
     trace.push("❌ Tier 1: no direct data for " + key);
@@ -191,7 +191,7 @@ window.RentModule = (function() {
     html += "<div class='rent-verdict " + verdictClass + "'>Your quoted rent of " + fmt(quotedRent) + " is <strong>" + verdict + "</strong> for a " + bhk + " in " + area + ".</div>";
     html += "<div class='rent-detail'>Median <strong>" + fmt(c.median) + "</strong> · Range " + fmt(c.low) + "–" + fmt(c.high);
     html += " · Confidence: <span class='confidence-badge confidence-" + band.toLowerCase() + "'>" + band + " (" + score + ")</span>";
-    html += " · Based on " + c.n + " data point" + (c.n !== 1 ? "s" : "") + "</div>";
+    html += " · Based on " + c.n + (result.tier === "direct" ? " live listings within 2 km" : " listings (estimated via " + result.tier + ")") + "</div>";
     if (result.tier !== "direct") {
       html += "<div class='fallback-note'>⚠️ Estimated via " + result.tier + " — data may be less accurate.</div>";
     }
