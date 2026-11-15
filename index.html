@@ -13,8 +13,13 @@
         <span class="header-icon">🏙️</span>
         <div>
           <h1>Namma Bengaluru Buddy</h1>
-          <p class="header-sub">Your first 30 days in Bengaluru, sorted.</p>
+          <p class="header-sub" data-i18n="tagline">Your first 30 days in Bengaluru, sorted.</p>
         </div>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English" lang="en">English</button>
+        <button type="button" class="lang-btn" data-lang="kn" aria-pressed="false" aria-label="Kannada" lang="kn">ಕನ್ನಡ</button>
+        <button type="button" class="lang-btn" data-lang="hi" aria-pressed="false" aria-label="Hindi" lang="hi">हिन्दी</button>
       </div>
       <div class="header-disclaimer">
         ⚠️ All data is <strong>indicative</strong> · This is <strong>guidance only, not legal advice</strong>
@@ -26,10 +31,10 @@
 
     <!-- ── Step 1: Intake Form ─────────────────────────────────────────── -->
     <section class="card" id="section-intake">
-      <h2 class="section-title"><span class="step-badge">1</span> About You</h2>
+      <h2 class="section-title"><span class="step-badge">1</span> <span data-i18n="s1">About You</span></h2>
 
       <div class="demo-bar">
-        <button class="btn-secondary" id="btn-load-demo">⚡ Load demo profile</button>
+        <button type="button" class="btn-secondary" id="btn-load-demo" data-i18n="btnDemo">⚡ Load demo profile</button>
         <span class="demo-hint">Manyata Tech Park · ₹30k · Solo · bike from West Bengal · non-veg</span>
       </div>
 
@@ -108,36 +113,45 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary">Generate My Plan →</button>
+          <button type="submit" class="btn-primary" data-i18n="btnGenerate">Generate My Plan →</button>
         </div>
       </form>
     </section>
 
+    <!-- ── Impact summary (the judge screen) ──────────────────────────── -->
+    <section class="card hidden impact-card" id="section-impact" aria-live="polite">
+      <h2 class="section-title"><span class="step-badge">★</span> <span data-i18n="sImpact">Your Bengaluru snapshot</span></h2>
+      <div id="impact-output" class="impact-grid"></div>
+    </section>
+
     <!-- ── Step 2: Plan ───────────────────────────────────────────────── -->
     <section class="card hidden" id="section-plan">
-      <h2 class="section-title"><span class="step-badge">2</span> Your Week 1–4 Plan</h2>
-      <div id="plan-slip-banner" class="slip-banner hidden"></div>
+      <h2 class="section-title"><span class="step-badge">2</span> <span data-i18n="s2">Your Week 1–4 Plan</span></h2>
+      <div class="plan-actions">
+        <button type="button" class="btn-secondary" id="btn-simulate-slip" aria-pressed="false" data-i18n="btnSimulate">🔁 Simulate: agreement delayed by a week</button>
+      </div>
+      <div id="plan-slip-banner" class="slip-banner hidden" role="status" aria-live="polite"></div>
       <div id="plan-output"></div>
       <details class="trace-panel">
-        <summary>▸ Agent Trace</summary>
+        <summary data-i18n="trace">▸ Agent Trace</summary>
         <ul id="plan-trace" class="trace-list"></ul>
       </details>
     </section>
 
     <!-- ── Step 3: Area Finder ────────────────────────────────────────── -->
     <section class="card hidden" id="section-areas">
-      <h2 class="section-title"><span class="step-badge">3</span> Best Areas for You</h2>
-      <p class="section-note">Ranked by commute (40%) · rent fit (40%) · owner-rule fit (20%). Data is indicative.</p>
+      <h2 class="section-title"><span class="step-badge">3</span> <span data-i18n="s3">Best Areas for You</span></h2>
+      <p class="section-note">Ranked by commute (40%) · rent fit (40%) · owner-rule fit (20%), minus a monsoon/civic risk penalty (flooding, water source, power cuts). Data is indicative: verify on your visit.</p>
       <div id="areas-output"></div>
       <details class="trace-panel">
-        <summary>▸ Agent Trace</summary>
+        <summary data-i18n="trace">▸ Agent Trace</summary>
         <ul id="areas-trace" class="trace-list"></ul>
       </details>
     </section>
 
     <!-- ── Step 4: Rent Check ─────────────────────────────────────────── -->
     <section class="card hidden" id="section-rent">
-      <h2 class="section-title"><span class="step-badge">4</span> Fair-Rent Check</h2>
+      <h2 class="section-title"><span class="step-badge">4</span> <span data-i18n="s4">Fair-Rent Check</span></h2>
       <p class="section-note">Enter a quoted rent to see if it's fair for the area. Data is indicative.</p>
       <div class="rent-form-row">
         <div class="field">
@@ -159,19 +173,20 @@
           <input type="number" id="rent-quoted" min="1000" step="500" placeholder="30000" />
         </div>
         <div class="field field-btn">
-          <button class="btn-primary" id="btn-rent-check">Check →</button>
+          <button type="button" class="btn-primary" id="btn-rent-check" data-i18n="btnCheck">Check →</button>
         </div>
       </div>
       <div id="rent-output"></div>
       <details class="trace-panel hidden" id="rent-trace-panel">
-        <summary>▸ Agent Trace</summary>
+        <summary data-i18n="trace">▸ Agent Trace</summary>
         <ul id="rent-trace" class="trace-list"></ul>
       </details>
     </section>
 
     <!-- ── Step 5: Agreement Checker ─────────────────────────────────── -->
     <section class="card hidden" id="section-agreement">
-      <h2 class="section-title"><span class="step-badge">5</span> Agreement Red-Flag Checker</h2>
+      <h2 class="section-title"><span class="step-badge">5</span> <span data-i18n="s5">Agreement Red-Flag Checker</span></h2>
+      <p class="privacy-note" data-i18n="privacy">🔒 Your agreement text never leaves your device. Nothing is uploaded.</p>
       <p class="section-note">Paste your rental agreement text below. For best results include the full text. <strong>Not legal advice.</strong></p>
 
       <div class="agreement-top-row">
@@ -180,7 +195,7 @@
           <input type="number" id="agreement-rent" min="1000" step="500" placeholder="30000" />
         </div>
         <div class="field field-btn">
-          <button class="btn-secondary" id="btn-load-sample-agreement">📄 Load sample agreement</button>
+          <button type="button" class="btn-secondary" id="btn-load-sample-agreement" data-i18n="btnSample">📄 Load sample agreement</button>
         </div>
       </div>
 
@@ -190,22 +205,23 @@
       </div>
 
       <div class="form-actions">
-        <button class="btn-primary" id="btn-scan-agreement">Scan for red flags →</button>
+        <button type="button" class="btn-primary" id="btn-scan-agreement" data-i18n="btnScan">Scan for red flags →</button>
       </div>
 
       <div id="agreement-output" class="hidden">
         <div id="agreement-risk-score"></div>
         <div id="agreement-flags"></div>
         <div id="agreement-negotiation" class="hidden">
-          <h3>Suggested negotiation message</h3>
+          <h3 data-i18n="negTitle">Suggested negotiation message</h3>
           <div class="negotiation-box">
             <pre id="negotiation-text"></pre>
-            <button class="btn-secondary" id="btn-copy-negotiation">📋 Copy message</button>
+            <button type="button" class="btn-secondary" id="btn-copy-negotiation" aria-label="Copy negotiation message" data-i18n="btnCopy">📋 Copy message</button>
           </div>
         </div>
+        <p class="legal-note" data-i18n="legal">⚖️ Before you sign: have a lawyer or free legal aid from the Karnataka State Legal Services Authority (KSLSA) review it. Buddy flags risks; a human should make the call.</p>
       </div>
       <details class="trace-panel hidden" id="agreement-trace-panel">
-        <summary>▸ Agent Trace</summary>
+        <summary data-i18n="trace">▸ Agent Trace</summary>
         <ul id="agreement-trace" class="trace-list"></ul>
       </details>
     </section>
@@ -227,6 +243,8 @@
   <script src="modules/areas.js"></script>
   <script src="modules/rent.js"></script>
   <script src="modules/redflags.js"></script>
+
+  <script src="modules/i18n.js"></script>
 
   <!-- Orchestrator -->
   <script src="app.js"></script>

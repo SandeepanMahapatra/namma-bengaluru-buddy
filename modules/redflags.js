@@ -23,6 +23,49 @@ window.RedFlagsModule = (function() {
     return "…" + s + "…";
   }
 
+  function inr(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+
+  function inrShort(n) {
+    if (n >= 100000) return "₹" + (Math.round(n / 10000) / 10) + " lakh";
+    if (n >= 1000) return "₹" + Math.round(n / 1000) + "k";
+    return inr(n);
+  }
+
+  function amountNear(text, words) {
+    var after  = new RegExp("(?:" + words + ")[^.]{0,120}?(?:rs\\.?|inr|₹)\\s*([\\d,]+)", "i");
+    var before = new RegExp("(?:rs\\.?|inr|₹)\\s*([\\d,]+)[^.]{0,80}(?:" + words + ")", "i");
+    var m = text.match(after) || text.match(before);
+    return m ? parseFloat(m[1].replace(/,/g, "")) : 0;
+  }
+
+  // Measurable impact: how much of the tenant's money these clauses put at risk
+  function moneyAtRisk(text, rent, firedIds, trace) {
+    var items = [];
+    var increaseRule = window.DATA_REDFLAGS.filter(function(r) { return r.id === "high_annual_increase"; })[0];
+    var depositRule  = window.DATA_REDFLAGS.filter(function(r) { return r.id === "excess_deposit"; })[0];
+
+    if (rent) {
+      var deposit = depositRule ? extractNumber(text, depositRule.extractPattern) : null;
+      if (deposit && deposit > rent * 3) {
+        items.push({ label: "Excess deposit (above 3 months' rent)", amount: deposit - rent * 3,
+          calc: inr(deposit) + " − 3 × " + inr(rent) });
+      }
+      var pct = increaseRule ? extractNumber(text, increaseRule.extractPattern) : null;
+      if (pct && pct > 5) {
+        items.push({ label: "Extra rent in year 2 (" + pct + "% vs 5% norm)", amount: (pct - 5) / 100 * rent * 12,
+          calc: "(" + pct + "% − 5%) × " + inr(rent) + " × 12" });
+      }
+    }
+    if (firedIds.indexOf("painting_deduction") !== -1) {
+      var paint = amountNear(text, "painting|whitewash|cleaning");
+      if (paint) items.push({ label: "Fixed painting/cleaning deduction", amount: paint, calc: "amount stated in clause" });
+    }
+    var total = items.reduce(function(s, it) { return s + it.amount; }, 0);
+    items.forEach(function(it) { trace.push("💰 At risk: " + it.label + " = " + it.calc + " = " + inr(it.amount)); });
+    trace.push("💰 Total money at risk: " + inr(total));
+    return { items: items, total: total };
+  }
+
   function run(agreementText, monthlyRent) {
     var trace = [];
     var triggered = [];
@@ -132,6 +175,16 @@ window.RedFlagsModule = (function() {
 
     trace.push("── Total risk score: " + totalRisk + " → " + band + " risk ──");
 
+    if (!monthlyRent) {
+      var rentInText = extractNumber(agreementText, "monthly\\s+rent[^₹\\d]{0,40}(?:rs\\.?|inr|₹)?\\s*([\\d,]+)");
+      if (rentInText) {
+        monthlyRent = rentInText;
+        trace.push("Monthly rent not entered — read " + inr(rentInText) + " from the agreement text");
+      }
+    }
+    var atRisk = moneyAtRisk(agreementText, monthlyRent,
+      triggered.map(function(t) { return t.rule.id; }), trace);
+
     // Render risk score
     var riskEl = document.getElementById("agreement-risk-score");
     var gaugeClass = band.toLowerCase();
@@ -142,6 +195,16 @@ window.RedFlagsModule = (function() {
       "<div><span class='risk-band'>" + (band === "High" ? "🔴" : band === "Medium" ? "🟡" : "🟢") + " " + band + " risk</span></div>" +
       "<div style='font-size:.83rem;color:var(--text-muted)'>" + triggered.length + " flag" + (triggered.length !== 1 ? "s" : "") + " found · Guidance only, not legal advice</div>" +
       "</div></div>";
+
+    if (atRisk.total > 0) {
+      riskEl.innerHTML =
+        "<div class='money-at-risk' role='status'>" +
+        "<div class='mar-amount'>" + inrShort(atRisk.total) + " at risk in this agreement</div>" +
+        "<ul class='mar-items'>" + atRisk.items.map(function(it) {
+          return "<li><span>" + it.label + "</span><strong>" + inr(it.amount) + "</strong></li>";
+        }).join("") + "<li class='mar-total'><span>Total</span><strong>" + inr(atRisk.total) + "</strong></li></ul>" +
+        "</div>" + riskEl.innerHTML;
+    }
 
     // Render flags grouped by severity
     var flagsEl = document.getElementById("agreement-flags");
@@ -189,7 +252,9 @@ window.RedFlagsModule = (function() {
       textEl.textContent =
         "Dear [Landlord's name],\n\n" +
         "Thank you for sharing the draft rental agreement. I am very interested in the property and look forward to being a responsible tenant.\n\n" +
-        "I have reviewed the agreement and would like to kindly request a few changes before we proceed:\n\n" +
+        "I have reviewed the agreement and would like to kindly request a few changes before we proceed" +
+        (atRisk.total > 0 ? " (as drafted, these clauses put about " + inr(atRisk.total) + " of my money at risk)" : "") +
+        ":\n\n" +
         asks + "\n\n" +
         "I hope these are reasonable and that we can finalise the agreement soon. Please let me know if you would like to discuss any of these points.\n\n" +
         "Warm regards,\n[Your name]";
@@ -208,6 +273,8 @@ window.RedFlagsModule = (function() {
       li.innerHTML = line;
       traceUl.appendChild(li);
     });
+
+    return { risk: totalRisk, band: band, flags: triggered.length, atRisk: atRisk.total };
   }
 
   return { run: run };

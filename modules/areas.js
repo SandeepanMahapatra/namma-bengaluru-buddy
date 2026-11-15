@@ -39,6 +39,40 @@ window.AreasModule = (function() {
     return Math.round((total / keys.length) * 100);
   }
 
+  // Monsoon / civic risk penalty (points off the 0–100 total)
+  var RISK_PENALTY = {
+    waterlogging: { high: 8, medium: 4, low: 0 },
+    waterSource:  { "tanker-dependent": 4, "mixed": 2, "Cauvery piped": 0 },
+    powerCuts:    { high: 3, medium: 1, low: 0 }
+  };
+
+  function riskPenalty(area) {
+    if (!area.risk) return 0;
+    return (RISK_PENALTY.waterlogging[area.risk.waterlogging] || 0) +
+           (RISK_PENALTY.waterSource[area.risk.waterSource] || 0) +
+           (RISK_PENALTY.powerCuts[area.risk.powerCuts] || 0);
+  }
+
+  // Peak (9 AM) vs off-peak (2 PM) commute, derived from the typical time
+  function commuteWindows(minutes) {
+    if (minutes === undefined) return null;
+    return { peak: Math.round(minutes * 1.4), offPeak: Math.max(5, Math.round(minutes * 0.75)) };
+  }
+
+  function suggestedMode(area, minutes, profile) {
+    if (profile.vehicle === "Two-wheeler") return "🛵 Bike";
+    if (profile.vehicle === "Car") return minutes > 40 ? "🚗 Car (leave before 8:30)" : "🚗 Car";
+    if (minutes !== undefined && minutes <= 15) return "🛺 Auto / walk";
+    if ((area.tags || []).some(function(t) { return /metro/i.test(t); })) return "🚇 Metro + walk";
+    return "🚌 BMTC bus";
+  }
+
+  function riskLevelClass(v) {
+    if (v === "high" || v === "tanker-dependent") return "risk-high";
+    if (v === "medium" || v === "mixed") return "risk-med";
+    return "risk-low";
+  }
+
   function run(profile, trace) {
     var office = profile.office_area;
     var budget = parseInt(profile.budget_rent, 10);
@@ -49,16 +83,22 @@ window.AreasModule = (function() {
       var cs = commuteScore(minutes);
       var rs = rentScore(area[rentKey], budget);
       var fs = fitScore(area, profile);
-      var total = Math.round(cs * 0.4 + rs * 0.4 + fs * 0.2);
+      var base = Math.round(cs * 0.4 + rs * 0.4 + fs * 0.2);
+      var penalty = riskPenalty(area);
+      var total = Math.max(0, base - penalty);
 
       var traceDetail = area.name + ": commute " +
         (minutes !== undefined ? minutes + " min → " + cs : "n/a → " + cs) +
         " | rent ₹" + (area[rentKey] / 1000).toFixed(0) + "k vs budget ₹" + (budget/1000).toFixed(0) + "k → " + rs +
         " | fit (" + getRelevantFitKeys(profile).join("+") + "): " + fs + "% → " + fs +
+        " | base " + base +
+        (area.risk ? " | monsoon/civic risk (flooding " + area.risk.waterlogging + ", water " + area.risk.waterSource +
+          ", power cuts " + area.risk.powerCuts + ") → −" + penalty : "") +
         " | total " + total;
       trace.push(traceDetail);
 
-      return { area: area, commuteScore: cs, rentScore: rs, fitScore: fs, total: total, minutes: minutes };
+      return { area: area, commuteScore: cs, rentScore: rs, fitScore: fs, total: total, minutes: minutes,
+               penalty: penalty, windows: commuteWindows(minutes), mode: suggestedMode(area, minutes, profile) };
     });
 
     scored.sort(function(a, b) { return b.total - a.total; });
@@ -79,6 +119,22 @@ window.AreasModule = (function() {
       html += scoreBar("Commute", item.commuteScore, item.minutes !== undefined ? item.minutes + " min" : "—");
       html += scoreBar("Rent fit", item.rentScore, "₹" + (a[rentKey]/1000).toFixed(0) + "k");
       html += scoreBar("Owner fit", item.fitScore, item.fitScore + "%");
+
+      // Commute planning: peak vs off-peak + suggested mode
+      if (item.windows) {
+        html += "<div class='commute-row'>⏰ 9 AM: <strong>" + item.windows.peak + " min</strong> · 2 PM: " +
+          item.windows.offPeak + " min · Suggested: <strong>" + item.mode + "</strong></div>";
+      }
+
+      // Neighbourhood risk chips
+      if (a.risk) {
+        html += "<div class='risk-chips' title='" + a.risk.source.replace(/'/g, "&#39;") + "'>" +
+          "<span class='risk-chip " + riskLevelClass(a.risk.waterlogging) + "'>🌧️ Monsoon flooding: " + a.risk.waterlogging + "</span>" +
+          "<span class='risk-chip " + riskLevelClass(a.risk.waterSource) + "'>🚰 Water: " + a.risk.waterSource + "</span>" +
+          "<span class='risk-chip " + riskLevelClass(a.risk.powerCuts) + "'>⚡ Power cuts: " + a.risk.powerCuts + "</span>" +
+          (item.penalty ? "<span class='risk-penalty'>−" + item.penalty + " risk</span>" : "") +
+          "</div>";
+      }
 
       // Tags
       var shownTags = (a.tags || []).filter(function(t) {
@@ -109,7 +165,8 @@ window.AreasModule = (function() {
     // Return top area names for token substitution
     return {
       top_area_1: top5[0] ? top5[0].area.name : "",
-      top_area_2: top5[1] ? top5[1].area.name : ""
+      top_area_2: top5[1] ? top5[1].area.name : "",
+      top: top5[0] || null
     };
   }
 

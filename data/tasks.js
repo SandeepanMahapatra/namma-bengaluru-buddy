@@ -23,6 +23,17 @@ window.DATA_TASKS = [
     tips: ["Ask if owner is veg-only/family-only before visiting.", "Check water supply timings and pressure."]
   },
   {
+    id: "ask_water_flooding",
+    title: "Ask about water source and monsoon flooding during flat visits",
+    defaultWeek: 1,
+    lagDays: 0,
+    category: "Housing",
+    depends_on: ["shortlist_areas"],
+    required_if: {},
+    description: "Check the risk chips on your Area Finder cards, then confirm on site: Is water Cauvery piped, borewell or tanker? Did the road or basement flood last monsoon? How long are power cuts?",
+    tips: ["Ask the security guard or a neighbour, not just the owner. Look for water marks on compound walls and a tanker schedule near the sump."]
+  },
+  {
     id: "sign_agreement",
     title: "Sign rental agreement (register if ≥ 12 months)",
     defaultWeek: 1,
@@ -160,7 +171,7 @@ window.DATA_TASKS = [
   },
   {
     id: "commute_trial",
-    title: "Do a trial commute to {{office_area}} before Day 1",
+    title: "Do a 9 AM trial commute to {{office_area}} before Day 1",
     defaultWeek: 1,
     lagDays: 1,
     category: "Commute",

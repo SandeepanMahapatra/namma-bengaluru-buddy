@@ -126,6 +126,34 @@
     };
   }
 
+  // ── Impact summary card (the one screen for judges) ──────────────────
+
+  var impact = { plan: null, top: null, agreement: null };
+
+  function inr(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+
+  function renderImpact() {
+    var el = document.getElementById("impact-output");
+    if (!el) return;
+    var p = impact.plan, top = impact.top, ag = impact.agreement;
+    function tile(value, label, sub) {
+      return "<div class='impact-tile'><div class='impact-value'>" + value + "</div>" +
+        "<div class='impact-label'>" + label + "</div>" + (sub ? "<div class='impact-sub'>" + sub + "</div>" : "") + "</div>";
+    }
+    var html = "";
+    html += tile(p ? p.tasks : "—", "tasks planned", p ? "across " + p.weeks + " weeks" + (p.overflow ? " (+ some spill past Week 4)" : "") : "");
+    html += top
+      ? tile(top.area.name, "top area for you", (top.windows ? top.windows.peak + " min at 9 AM · " : "") + top.mode)
+      : tile("—", "top area", "");
+    html += ag
+      ? tile(ag.atRisk > 0 ? inr(ag.atRisk) : "₹0", "money at risk flagged", "in your agreement")
+      : tile("—", "money at risk", "<a href='#section-agreement'>Scan your agreement ↓</a>");
+    html += ag
+      ? tile(ag.flags, "red flags found", ag.band + " risk · " + ag.risk + "/100")
+      : tile("—", "red flags", "not scanned yet");
+    el.innerHTML = html;
+  }
+
   // ── Show section ──────────────────────────────────────────────────────────
 
   function showSection(id) {
@@ -166,7 +194,7 @@
     }
 
     // Reveal all sections first so they are visible even if a module errors
-    ["section-plan", "section-areas", "section-rent", "section-agreement"].forEach(function(id) {
+    ["section-impact", "section-plan", "section-areas", "section-rent", "section-agreement"].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.classList.remove("hidden");
     });
@@ -176,6 +204,7 @@
     try {
       var areaTrace = [];
       areaTokens = window.AreasModule.run(profile, areaTrace);
+      impact.top = areaTokens.top;
     } catch(err) {
       document.getElementById("areas-output").innerHTML = "<p style='color:var(--danger)'>Area finder error: " + err.message + "</p>";
     }
@@ -190,7 +219,7 @@
 
     // Step 2: Plan
     try {
-      window.PlanModule.run(profile, tokens);
+      impact.plan = window.PlanModule.run(profile, tokens);
     } catch(err) {
       document.getElementById("plan-output").innerHTML = "<p style='color:var(--danger)'>Plan engine error: " + err.message + "</p>";
     }
@@ -210,8 +239,10 @@
     // Pre-fill agreement rent
     document.getElementById("agreement-rent").value = profile.budget_rent;
 
-    // Scroll to the plan (top of results)
-    document.getElementById("section-plan").scrollIntoView({ behavior: "smooth", block: "start" });
+    renderImpact();
+
+    // Scroll to the snapshot (top of results)
+    document.getElementById("section-impact").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // ── Rent check button ─────────────────────────────────────────────────────
@@ -228,7 +259,8 @@
   function handleAgreementScan() {
     var text = document.getElementById("agreement-text").value;
     var rent = parseInt(document.getElementById("agreement-rent").value, 10) || null;
-    window.RedFlagsModule.run(text, rent);
+    var result = window.RedFlagsModule.run(text, rent);
+    if (result) { impact.agreement = result; renderImpact(); }
   }
 
   // ── Copy negotiation message ──────────────────────────────────────────────
@@ -238,8 +270,8 @@
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
         var btn = document.getElementById("btn-copy-negotiation");
-        btn.textContent = "✅ Copied!";
-        setTimeout(function() { btn.textContent = "📋 Copy message"; }, 2000);
+        btn.textContent = window.I18nModule.t("copied");
+        setTimeout(function() { btn.textContent = window.I18nModule.t("btnCopy"); }, 2000);
       });
     } else {
       // Fallback
@@ -252,15 +284,28 @@
       document.execCommand("copy");
       document.body.removeChild(ta);
       var btn = document.getElementById("btn-copy-negotiation");
-      btn.textContent = "✅ Copied!";
-      setTimeout(function() { btn.textContent = "📋 Copy message"; }, 2000);
+      btn.textContent = window.I18nModule.t("copied");
+      setTimeout(function() { btn.textContent = window.I18nModule.t("btnCopy"); }, 2000);
     }
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
+  function handleSimulateSlip() {
+    var on = window.PlanModule.toggleSlip();
+    var btn = document.getElementById("btn-simulate-slip");
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("data-i18n", on ? "btnSimulateUndo" : "btnSimulate");
+    btn.textContent = window.I18nModule.t(on ? "btnSimulateUndo" : "btnSimulate");
+    if (on) document.getElementById("plan-slip-banner").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   function init() {
     populateDropdowns();
+    window.I18nModule.init();
+
+    document.getElementById("btn-simulate-slip")
+      .addEventListener("click", handleSimulateSlip);
 
     document.getElementById("intake-form")
       .addEventListener("submit", handleFormSubmit);

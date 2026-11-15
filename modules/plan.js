@@ -99,7 +99,8 @@ function planTopoSort(tasks) {
   return sorted;
 }
 
-function planSchedule(sorted, joiningWeek, trace) {
+function planSchedule(sorted, joiningWeek, trace, slipWeeks) {
+  slipWeeks = slipWeeks || {};
   var scheduled = {};
   var lagMap = {};
   var i;
@@ -123,6 +124,10 @@ function planSchedule(sorted, joiningWeek, trace) {
     }
 
     var week = Math.max(task.defaultWeek, depWeek);
+    if (slipWeeks[task.id]) {
+      week += slipWeeks[task.id];
+      trace.push("Slip: " + task.id + " delayed by " + slipWeeks[task.id] + " week(s) → Week " + week);
+    }
 
     // Week cap: applies only to the joining week for Admin/Paperwork tasks
     if ((task.category === "Admin" || task.category === "Paperwork") && week === joiningWeek) {
@@ -162,7 +167,8 @@ function planFillTokens(text, tokens) {
   });
 }
 
-function planRender(scheduled, profile, tokens, trace) {
+function planRender(scheduled, profile, tokens, trace, moved) {
+  moved = moved || {};
   var state = planLoadState();
   var byWeek = { 1: [], 2: [], 3: [], 4: [], 5: [] };
   var i;
@@ -210,11 +216,12 @@ function planRender(scheduled, profile, tokens, trace) {
       var isDone = !!(state[t.id] && state[t.id].done);
       var title = planFillTokens(t.title, tokens);
       var desc  = planFillTokens(t.description, tokens);
-      var doneClass = isDone ? " task-done" : "";
+      var doneClass = (isDone ? " task-done" : "") + (moved[t.id] ? " task-moved" : "");
       html += "<li class='task-item" + doneClass + "'>";
       html += "<input type='checkbox' id='task-" + t.id + "' data-id='" + t.id + "'" + (isDone ? " checked" : "") + " />";
       html += "<label class='task-label' for='task-" + t.id + "'>";
-      html += "<div class='task-title'>" + title + " <span class='task-category'>" + t.category + "</span></div>";
+      html += "<div class='task-title'>" + title + " <span class='task-category'>" + t.category + "</span>" +
+        (moved[t.id] ? " <span class='moved-badge'>moved from Week " + moved[t.id] + "</span>" : "") + "</div>";
       html += "<div class='task-meta'>" + desc + "</div>";
       if (t.tips && t.tips.length > 0) {
         html += "<div class='task-meta' style='margin-top:.2rem'>&#128161; " + t.tips[0] + "</div>";
@@ -231,9 +238,10 @@ function planRender(scheduled, profile, tokens, trace) {
     for (i = 0; i < overflow.length; i++) {
       var ot = overflow[i].task;
       var otitle = planFillTokens(ot.title, tokens);
-      html += "<li class='task-item'><span style='width:1rem;display:inline-block'></span>" +
+      html += "<li class='task-item" + (moved[ot.id] ? " task-moved" : "") + "'><span style='width:1rem;display:inline-block'></span>" +
         "<div class='task-label'><div class='task-title'>" + otitle +
-        " <span class='task-category'>" + ot.category + "</span></div></div></li>";
+        " <span class='task-category'>" + ot.category + "</span>" +
+        (moved[ot.id] ? " <span class='moved-badge'>moved from Week " + moved[ot.id] + "</span>" : "") + "</div></div></li>";
     }
     html += "</ul></div>";
   }
@@ -261,6 +269,10 @@ function planRender(scheduled, profile, tokens, trace) {
   }
 }
 
+var planSlip = null; // e.g. { sign_agreement: 1 } while the "agreement delayed" simulation is on
+
+function planWeekName(w) { return w === 5 ? "Week 4+" : "Week " + w; }
+
 function planRun(profile, tokens) {
   planCurrentProfile = profile;
   planCurrentTokens  = tokens;
@@ -280,16 +292,50 @@ function planRun(profile, tokens) {
   var filtered = planFilterTasks(profile, trace);
   trace.push("Filtered to " + filtered.length + " of " + window.DATA_TASKS.length + " tasks");
 
-  var sorted   = planTopoSort(filtered);
-  var scheduled = planSchedule(sorted, joiningWeek, trace);
-
-  // Slip banner
+  var sorted    = planTopoSort(filtered);
+  var scheduled = planSchedule(sorted, joiningWeek, trace, null);
+  var moved = {};
   var banner = document.getElementById("plan-slip-banner");
-  if (banner) banner.classList.add("hidden");
+
+  if (planSlip) {
+    // Re-plan with the slip and diff against the on-time plan
+    var baseline = {};
+    scheduled.forEach(function(s) { baseline[s.task.id] = s.scheduledWeek; });
+    trace.push("── Re-planning: agreement signing delayed by " + planSlip.sign_agreement + " week ──");
+    scheduled = planSchedule(sorted, joiningWeek, trace, planSlip);
+    var movedLines = [];
+    scheduled.forEach(function(s) {
+      var before = baseline[s.task.id];
+      if (before !== s.scheduledWeek) {
+        moved[s.task.id] = before === 5 ? "4+" : before;
+        movedLines.push(s.task.id + " " + planWeekName(before) + " → " + planWeekName(s.scheduledWeek));
+      }
+    });
+    movedLines.forEach(function(l) { trace.push("Agreement delayed → moved " + l); });
+    var overflowNow = scheduled.filter(function(s) { return s.scheduledWeek === 5; }).length;
+    if (banner) {
+      banner.innerHTML = "⚠️ <strong>Agreement slipped by a week.</strong> Buddy re-planned your month: " +
+        movedLines.length + " task" + (movedLines.length !== 1 ? "s" : "") + " moved (highlighted below)" +
+        (overflowNow ? ", " + overflowNow + " now spill past Week 4" : "") + ".";
+      banner.classList.remove("hidden");
+    }
+  } else if (banner) {
+    banner.classList.add("hidden");
+  }
 
   trace.push("Scheduling complete — " + scheduled.length + " tasks placed");
 
-  planRender(scheduled, profile, tokens, trace);
+  planRender(scheduled, profile, tokens, trace, moved);
+
+  var lastWeek = 0;
+  scheduled.forEach(function(s) { if (s.scheduledWeek > lastWeek) lastWeek = s.scheduledWeek; });
+  return { tasks: scheduled.length, weeks: Math.min(lastWeek, 4), overflow: lastWeek > 4 };
 }
 
-window.PlanModule = { run: planRun };
+function planToggleSlip() {
+  planSlip = planSlip ? null : { sign_agreement: 1 };
+  if (planCurrentProfile) planRun(planCurrentProfile, planCurrentTokens);
+  return !!planSlip;
+}
+
+window.PlanModule = { run: planRun, toggleSlip: planToggleSlip };
