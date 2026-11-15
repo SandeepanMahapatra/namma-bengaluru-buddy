@@ -94,6 +94,7 @@ The design principle is **AI at authoring time, rules at runtime**:
    - language toggle
    - privacy and legal-aid notes
    - UI refresh: Namma Metro green/purple palette, snapshot hero, ranked area cards, money-at-risk callout
+   - sourced data: 2,524 live rent listings, OpenStreetMap + TomTom commute model, cited flood and water ratings (`scripts/build_data.py`)
 
    These were done with an AI coding assistant (Claude Code) and are kept as separate commits so the history shows what came from where.
 
