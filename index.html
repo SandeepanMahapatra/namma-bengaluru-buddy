@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Namma Bengaluru Buddy</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <span class="header-icon">🏙️</span>
+        <div>
+          <h1>Namma Bengaluru Buddy</h1>
+          <p class="header-sub">Your first 30 days in Bengaluru, sorted.</p>
+        </div>
+      </div>
+      <div class="header-disclaimer">
+        ⚠️ All data is <strong>indicative</strong> · This is <strong>guidance only, not legal advice</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ── Step 1: Intake Form ─────────────────────────────────────────── -->
+    <section class="card" id="section-intake">
+      <h2 class="section-title"><span class="step-badge">1</span> About You</h2>
+
+      <div class="demo-bar">
+        <button class="btn-secondary" id="btn-load-demo">⚡ Load demo profile</button>
+        <span class="demo-hint">Manyata Tech Park · ₹30k · Solo · bike from West Bengal · non-veg</span>
+      </div>
+
+      <form id="intake-form" autocomplete="off">
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="move_date">Arriving in Bengaluru</label>
+            <input type="date" id="move_date" name="move_date" required />
+          </div>
+
+          <div class="field">
+            <label for="join_date">Joining office on</label>
+            <input type="date" id="join_date" name="join_date" required />
+          </div>
+
+          <div class="field">
+            <label for="office_area">Office location</label>
+            <select id="office_area" name="office_area" required>
+              <option value="">— select —</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="budget_rent">Monthly rent budget (₹)</label>
+            <input type="number" id="budget_rent" name="budget_rent" min="5000" max="200000" step="500" placeholder="30000" required />
+          </div>
+
+          <div class="field">
+            <label for="household">Household</label>
+            <select id="household" name="household" required>
+              <option value="">— select —</option>
+              <option value="Solo">Solo</option>
+              <option value="Couple">Couple</option>
+              <option value="Family">Family (with children)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="vehicle">Vehicle</label>
+            <select id="vehicle" name="vehicle" required>
+              <option value="">— select —</option>
+              <option value="None">None — public transport / cabs</option>
+              <option value="Two-wheeler">Two-wheeler</option>
+              <option value="Car">Car</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="home_state">Home state (where vehicle is registered)</label>
+            <input type="text" id="home_state" name="home_state" placeholder="e.g. West Bengal" />
+          </div>
+
+          <div class="field">
+            <label for="diet">Diet</label>
+            <select id="diet" name="diet" required>
+              <option value="">— select —</option>
+              <option value="Veg">Vegetarian</option>
+              <option value="Non-veg">Non-vegetarian</option>
+              <option value="Vegan">Vegan</option>
+            </select>
+          </div>
+
+          <div class="field field-full">
+            <label>Languages you speak</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="languages" value="Kannada" /> Kannada</label>
+              <label><input type="checkbox" name="languages" value="Hindi" /> Hindi</label>
+              <label><input type="checkbox" name="languages" value="English" /> English</label>
+              <label><input type="checkbox" name="languages" value="Tamil" /> Tamil</label>
+              <label><input type="checkbox" name="languages" value="Telugu" /> Telugu</label>
+              <label><input type="checkbox" name="languages" value="Bengali" /> Bengali</label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Generate My Plan →</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── Step 2: Plan ───────────────────────────────────────────────── -->
+    <section class="card hidden" id="section-plan">
+      <h2 class="section-title"><span class="step-badge">2</span> Your Week 1–4 Plan</h2>
+      <div id="plan-slip-banner" class="slip-banner hidden"></div>
+      <div id="plan-output"></div>
+      <details class="trace-panel">
+        <summary>▸ Agent Trace</summary>
+        <ul id="plan-trace" class="trace-list"></ul>
+      </details>
+    </section>
+
+    <!-- ── Step 3: Area Finder ────────────────────────────────────────── -->
+    <section class="card hidden" id="section-areas">
+      <h2 class="section-title"><span class="step-badge">3</span> Best Areas for You</h2>
+      <p class="section-note">Ranked by commute (40%) · rent fit (40%) · owner-rule fit (20%). Data is indicative.</p>
+      <div id="areas-output"></div>
+      <details class="trace-panel">
+        <summary>▸ Agent Trace</summary>
+        <ul id="areas-trace" class="trace-list"></ul>
+      </details>
+    </section>
+
+    <!-- ── Step 4: Rent Check ─────────────────────────────────────────── -->
+    <section class="card hidden" id="section-rent">
+      <h2 class="section-title"><span class="step-badge">4</span> Fair-Rent Check</h2>
+      <p class="section-note">Enter a quoted rent to see if it's fair for the area. Data is indicative.</p>
+      <div class="rent-form-row">
+        <div class="field">
+          <label for="rent-area">Area</label>
+          <select id="rent-area">
+            <option value="">— select —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rent-bhk">BHK type</label>
+          <select id="rent-bhk">
+            <option value="1BHK">1 BHK</option>
+            <option value="2BHK" selected>2 BHK</option>
+            <option value="3BHK">3 BHK</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rent-quoted">Quoted rent (₹/month)</label>
+          <input type="number" id="rent-quoted" min="1000" step="500" placeholder="30000" />
+        </div>
+        <div class="field field-btn">
+          <button class="btn-primary" id="btn-rent-check">Check →</button>
+        </div>
+      </div>
+      <div id="rent-output"></div>
+      <details class="trace-panel hidden" id="rent-trace-panel">
+        <summary>▸ Agent Trace</summary>
+        <ul id="rent-trace" class="trace-list"></ul>
+      </details>
+    </section>
+
+    <!-- ── Step 5: Agreement Checker ─────────────────────────────────── -->
+    <section class="card hidden" id="section-agreement">
+      <h2 class="section-title"><span class="step-badge">5</span> Agreement Red-Flag Checker</h2>
+      <p class="section-note">Paste your rental agreement text below. For best results include the full text. <strong>Not legal advice.</strong></p>
+
+      <div class="agreement-top-row">
+        <div class="field">
+          <label for="agreement-rent">Your monthly rent (₹) — for deposit check</label>
+          <input type="number" id="agreement-rent" min="1000" step="500" placeholder="30000" />
+        </div>
+        <div class="field field-btn">
+          <button class="btn-secondary" id="btn-load-sample-agreement">📄 Load sample agreement</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="agreement-text">Agreement text</label>
+        <textarea id="agreement-text" rows="10" placeholder="Paste the full rental agreement here…"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" id="btn-scan-agreement">Scan for red flags →</button>
+      </div>
+
+      <div id="agreement-output" class="hidden">
+        <div id="agreement-risk-score"></div>
+        <div id="agreement-flags"></div>
+        <div id="agreement-negotiation" class="hidden">
+          <h3>Suggested negotiation message</h3>
+          <div class="negotiation-box">
+            <pre id="negotiation-text"></pre>
+            <button class="btn-secondary" id="btn-copy-negotiation">📋 Copy message</button>
+          </div>
+        </div>
+      </div>
+      <details class="trace-panel hidden" id="agreement-trace-panel">
+        <summary>▸ Agent Trace</summary>
+        <ul id="agreement-trace" class="trace-list"></ul>
+      </details>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Made with <strong>IBM Bob</strong> · Namma Bengaluru Buddy · Hackathon MVP · Guidance only, not legal advice</p>
+  </footer>
+
+  <!-- Data globals (must load before modules) -->
+  <script src="data/tasks.js"></script>
+  <script src="data/areas.js"></script>
+  <script src="data/rent.js"></script>
+  <script src="data/redflags.js"></script>
+
+  <!-- Modules -->
+  <script src="modules/plan.js"></script>
+  <script src="modules/areas.js"></script>
+  <script src="modules/rent.js"></script>
+  <script src="modules/redflags.js"></script>
+
+  <!-- Orchestrator -->
+  <script src="app.js"></script>
+</body>
+</html>
